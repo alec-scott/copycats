@@ -1,0 +1,338 @@
+package com.copycatsplus.copycats.datagen.recipes;
+
+import com.copycatsplus.copycats.CCBlocks;
+import com.copycatsplus.copycats.CCItems;
+import com.copycatsplus.copycats.CCTags;
+import com.copycatsplus.copycats.foundation.copycat.ICopycatBlock;
+import com.copycatsplus.copycats.datagen.recipes.gen.CopycatsRecipeProvider;
+import com.copycatsplus.copycats.datagen.recipes.gen.GeneratedRecipeBuilder;
+import com.copycatsplus.copycats.utility.Platform;
+import com.zurrtum.create.AllBlocks;
+import com.zurrtum.create.AllItems;
+import com.copycatsplus.copycats.port.registrate.util.entry.ItemProviderEntry;
+import com.copycatsplus.copycats.port.registrate.util.entry.RegistryEntry;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.data.PackOutput;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.block.Block;
+
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+
+import static com.copycatsplus.copycats.datagen.recipes.gen.GeneratedRecipeBuilder.GeneratedRecipe;
+
+public class CCStandardRecipes extends CopycatsRecipeProvider {
+
+    private final Set<Block> copycatsWithRecipes = new HashSet<>();
+
+    private final Marker PALETTES = enterFolder("palettes");
+
+    GeneratedRecipe COPYCAT_SLAB = copycat(CCBlocks.COPYCAT_SLAB, 2);
+
+    GeneratedRecipe COPYCAT_SLAB_FROM_PANELS = create(CCBlocks.COPYCAT_SLAB).withSuffix("_from_panels")
+            .unlockedBy(AllBlocks.COPYCAT_PANEL::get)
+            .requiresResultFeature()
+            .viaShaped(b -> b
+                    .define('p', AllBlocks.COPYCAT_PANEL)
+                    .pattern("p")
+                    .pattern("p")
+            );
+
+    GeneratedRecipe COPYCAT_SLAB_FROM_STEPS = create(CCBlocks.COPYCAT_SLAB).withSuffix("_from_steps")
+            .unlockedBy(AllBlocks.COPYCAT_STEP::get)
+            .requiresResultFeature()
+            .viaShaped(b -> b
+                    .define('s', AllBlocks.COPYCAT_STEP)
+                    .pattern("ss")
+            );
+
+    GeneratedRecipe COPYCAT_SLAB_FROM_BEAMS = create(CCBlocks.COPYCAT_SLAB).withSuffix("_from_beams")
+            .unlockedByTag(() -> CCTags.Items.COPYCAT_BEAM.tag)
+            .requiresResultFeature()
+            .requiresFeature(CCBlocks.COPYCAT_BEAM)
+            .viaShaped(b -> b
+                    .define('s', CCTags.Items.COPYCAT_BEAM.tag)
+                    .pattern("ss")
+            );
+
+    GeneratedRecipe COPYCAT_BLOCK = copycat(CCBlocks.COPYCAT_BLOCK, 1);
+
+    GeneratedRecipe COPYCAT_BLOCK_FROM_SLABS = create(CCBlocks.COPYCAT_BLOCK).withSuffix("_from_slabs")
+            .unlockedByTag(() -> CCTags.Items.COPYCAT_SLAB.tag)
+            .requiresResultFeature()
+            .requiresFeature(CCBlocks.COPYCAT_SLAB)
+            .viaShaped(b -> b
+                    .define('s', CCTags.Items.COPYCAT_SLAB.tag)
+                    .pattern("s")
+                    .pattern("s")
+            );
+
+    GeneratedRecipe COPYCAT_BEAM = copycat(CCBlocks.COPYCAT_BEAM, 4);
+
+    GeneratedRecipe COPYCAT_VERTICAL_STEP = copycat(CCBlocks.COPYCAT_VERTICAL_STEP, 4);
+
+    GeneratedRecipe COPYCAT_STEP_CYCLE_1 = create(AllBlocks.COPYCAT_STEP).withSuffix("_from_conversion")
+            .unlockedByTag(() -> CCTags.Items.COPYCAT_VERTICAL_STEP.tag)
+            .requiresFeature(CCBlocks.COPYCAT_VERTICAL_STEP)
+            .viaShapeless(b -> b
+                    .requires(CCTags.Items.COPYCAT_VERTICAL_STEP.tag)
+            );
+
+    GeneratedRecipe COPYCAT_STEP_CYCLE_2 = create(CCBlocks.COPYCAT_VERTICAL_STEP).withSuffix("_from_conversion")
+            .unlockedBy(AllBlocks.COPYCAT_STEP::get)
+            .requiresResultFeature()
+            .viaShapeless(b -> b
+                    .requires(AllBlocks.COPYCAT_STEP)
+            );
+
+    GeneratedRecipe COPYCAT_HALF_PANEL = copycat(CCBlocks.COPYCAT_HALF_PANEL, 8);
+
+    GeneratedRecipe COPYCAT_PANEL_FROM_HALF_PANELS = create(AllBlocks.COPYCAT_PANEL).withSuffix("_from_half_panels")
+            .unlockedBy(CCBlocks.COPYCAT_HALF_PANEL::get)
+            .requiresFeature(CCBlocks.COPYCAT_HALF_PANEL)
+            .viaShaped(b -> b
+                    .define('s', CCBlocks.COPYCAT_HALF_PANEL)
+                    .pattern("ss")
+            );
+
+    GeneratedRecipe COPYCAT_STAIRS = copycat(CCBlocks.COPYCAT_STAIRS, 1);
+
+    GeneratedRecipe COPYCAT_FENCE = copycat(CCBlocks.COPYCAT_FENCE, 1);
+
+    GeneratedRecipe COPYCAT_FENCE_GATE = copycat(CCBlocks.COPYCAT_FENCE_GATE, 1);
+
+    GeneratedRecipe COPYCAT_TRAPDOOR = copycat(CCBlocks.COPYCAT_TRAPDOOR, 4);
+
+    GeneratedRecipe COPYCAT_IRON_TRAPDOOR = copycat(CCBlocks.COPYCAT_IRON_TRAPDOOR, 2);
+
+    GeneratedRecipe COPYCAT_TRAPDOOR_CYCLE = conversionCycle(AllBlocks.COPYCAT_PANEL, CCBlocks.COPYCAT_TRAPDOOR);
+
+    GeneratedRecipe COPYCAT_WALL = copycat(CCBlocks.COPYCAT_WALL, 1);
+
+    GeneratedRecipe COPYCAT_BOARD = copycat(CCBlocks.COPYCAT_BOARD, 8);
+
+    GeneratedRecipe COPYCAT_BOX = create(CCItems.COPYCAT_BOX)
+            .unlockedByTag(() -> CCTags.Items.COPYCAT_BOARD.tag)
+            .requiresResultFeature()
+            .viaShaped(b -> b
+                    .define('s', CCTags.Items.COPYCAT_BOARD.tag)
+                    .pattern("ss ")
+                    .pattern("s s")
+                    .pattern(" ss")
+            );
+
+    GeneratedRecipe COPYCAT_CATWALK = create(CCItems.COPYCAT_CATWALK)
+            .unlockedByTag(() -> CCTags.Items.COPYCAT_BOARD.tag)
+            .requiresResultFeature()
+            .viaShaped(b -> b
+                    .define('s', CCTags.Items.COPYCAT_BOARD.tag)
+                    .pattern("s s")
+                    .pattern(" s ")
+            );
+
+    GeneratedRecipe COPYCAT_BYTE = copycat(CCBlocks.COPYCAT_BYTE, 8);
+
+    GeneratedRecipe COPYCAT_BYTE_PANEL = copycat(CCBlocks.COPYCAT_BYTE_PANEL, 16);
+
+    GeneratedRecipe COPYCAT_LAYER = copycat(CCBlocks.COPYCAT_LAYER, 8);
+
+    GeneratedRecipe COPYCAT_SLICE = copycat(CCBlocks.COPYCAT_SLICE, 16);
+
+    GeneratedRecipe COPYCAT_VERTICAL_SLICE = copycat(CCBlocks.COPYCAT_VERTICAL_SLICE, 16);
+
+    GeneratedRecipe COPYCAT_CORNER_SLICE = copycat(CCBlocks.COPYCAT_CORNER_SLICE, 16);
+
+    GeneratedRecipe COPYCAT_SLICE_CYCLE = conversionCycle(CCBlocks.COPYCAT_SLICE, CCBlocks.COPYCAT_VERTICAL_SLICE);
+
+    GeneratedRecipe COPYCAT_HALF_LAYER = copycat(CCBlocks.COPYCAT_HALF_LAYER, 16);
+
+    GeneratedRecipe COPYCAT_VERTICAL_HALF_LAYER = copycat(CCBlocks.COPYCAT_VERTICAL_HALF_LAYER, 16);
+
+    GeneratedRecipe COPYCAT_STACKED_HALF_LAYER = copycat(CCBlocks.COPYCAT_STACKED_HALF_LAYER, 16);
+
+    GeneratedRecipe COPYCAT_HALF_LAYER_CYCLE = conversionCycle(CCBlocks.COPYCAT_HALF_LAYER, CCBlocks.COPYCAT_VERTICAL_HALF_LAYER, CCBlocks.COPYCAT_STACKED_HALF_LAYER);
+
+    GeneratedRecipe COPYCAT_LAYER_FROM_HALF_LAYERS = create(CCBlocks.COPYCAT_LAYER).withSuffix("_from_half_layers")
+            .unlockedBy(CCBlocks.COPYCAT_HALF_LAYER::get)
+            .requiresFeature(CCBlocks.COPYCAT_HALF_LAYER)
+            .viaShaped(b -> b
+                    .define('s', CCBlocks.COPYCAT_HALF_LAYER)
+                    .pattern("ss")
+            );
+
+    GeneratedRecipe COPYCAT_WOODEN_BUTTON = copycat(CCBlocks.COPYCAT_WOODEN_BUTTON, 4);
+
+    GeneratedRecipe COPYCAT_STONE_BUTTON = copycat(CCBlocks.COPYCAT_STONE_BUTTON, 4);
+
+    GeneratedRecipe COPYCAT_WOOD_PRESSURE_PLATE = copycat(CCBlocks.COPYCAT_WOODEN_PRESSURE_PLATE, 4);
+
+    GeneratedRecipe COPYCAT_STONE_PRESSURE_PLATE = copycat(CCBlocks.COPYCAT_STONE_PRESSURE_PLATE, 4);
+
+    GeneratedRecipe COPYCAT_LIGHT_WEIGHTED_PRESSURE_PLATE = copycat(CCBlocks.COPYCAT_LIGHT_WEIGHTED_PRESSURE_PLATE, 2);
+
+    GeneratedRecipe COPYCAT_HEAVY_WEIGHTED_PRESSURE_PLATE = copycat(CCBlocks.COPYCAT_HEAVY_WEIGHTED_PRESSURE_PLATE, 2);
+
+    GeneratedRecipe COPYCAT_VERTICAL_STAIRS = copycat(CCBlocks.COPYCAT_VERTICAL_STAIRS, 1);
+
+    GeneratedRecipe COPYCAT_STAIRS_CYCLE = conversionCycle(CCBlocks.COPYCAT_STAIRS, CCBlocks.COPYCAT_VERTICAL_STAIRS);
+
+    GeneratedRecipe COPYCAT_GHOST_BLOCK = copycat(CCBlocks.COPYCAT_GHOST_BLOCK, 1);
+
+    GeneratedRecipe COPYCAT_LADDER = copycat(CCBlocks.COPYCAT_LADDER, 6);
+
+    GeneratedRecipe COPYCAT_SLOPE = copycat(CCBlocks.COPYCAT_SLOPE, 2);
+
+    GeneratedRecipe COPYCAT_VERTICAL_SLOPE = copycat(CCBlocks.COPYCAT_VERTICAL_SLOPE, 2);
+
+    GeneratedRecipe COPYCAT_SLOPE_CYCLE = conversionCycle(CCBlocks.COPYCAT_SLOPE, CCBlocks.COPYCAT_VERTICAL_SLOPE);
+
+    GeneratedRecipe COPYCAT_SLOPE_LAYER = copycat(CCBlocks.COPYCAT_SLOPE_LAYER, 8);
+
+    GeneratedRecipe COPYCAT_SHAFT = copycat(CCBlocks.COPYCAT_SHAFT, 4);
+
+    GeneratedRecipe COPYCAT_COGWHEEL = copycatWithBaseItem(AllBlocks.COGWHEEL, CCBlocks.COPYCAT_COGWHEEL, 4);
+
+    GeneratedRecipe COPYCAT_LARGE_COGWHEEL = copycatWithBaseItem(AllBlocks.LARGE_COGWHEEL, CCBlocks.COPYCAT_LARGE_COGWHEEL, 4);
+
+    GeneratedRecipe COPYCAT_FLUID_PIPE = copycatWithBaseItem(AllBlocks.FLUID_PIPE, CCBlocks.COPYCAT_FLUID_PIPE, 4);
+
+    GeneratedRecipe COPYCAT_DOOR = copycat(CCBlocks.COPYCAT_DOOR, 1);
+
+    GeneratedRecipe COPYCAT_IRON_DOOR = copycatWithBaseItem(Items.IRON_DOOR, CCBlocks.COPYCAT_IRON_DOOR, 1);
+
+    GeneratedRecipe COPYCAT_PANE = copycat(CCBlocks.COPYCAT_PANE, 8);
+
+    GeneratedRecipe COPYCAT_SLIDING_DOOR = copycat(CCBlocks.COPYCAT_SLIDING_DOOR, 1);
+
+    GeneratedRecipe COPYCAT_FOLDING_DOOR = copycat(CCBlocks.COPYCAT_FOLDING_DOOR, 1);
+
+    GeneratedRecipe COPYCAT_SLIDING_DOOR_CYCLE = conversionCycle(CCBlocks.COPYCAT_SLIDING_DOOR, CCBlocks.COPYCAT_FOLDING_DOOR);
+
+    GeneratedRecipe COPYCAT_FLAT_PANE = copycat(CCBlocks.COPYCAT_FLAT_PANE, 8);
+
+    GeneratedRecipe COPYCAT_PANE_CYCLE = conversionCycle(CCBlocks.COPYCAT_PANE, CCBlocks.COPYCAT_FLAT_PANE);
+
+    Set<RegistryEntry<? extends Block, ?>> blocksWithoutRecipe = Set.of(
+            CCBlocks.COPYCAT_BASE,
+            CCBlocks.COPYCAT_GLASS_FLUID_PIPE
+    );
+
+    String currentFolder = "";
+
+    Marker enterFolder(String folder) {
+        currentFolder = folder;
+        return new Marker();
+    }
+
+    protected static class Marker {
+    }
+
+    static GeneratedRecipeBuilder create(Supplier<ItemLike> result) {
+        return com.copycatsplus.copycats.datagen.recipes.fabric.CCStandardRecipesImpl.create(result);
+    }
+
+    static GeneratedRecipeBuilder create(ResourceLocation result) {
+        return com.copycatsplus.copycats.datagen.recipes.fabric.CCStandardRecipesImpl.create(result);
+    }
+
+    static GeneratedRecipeBuilder create(ItemProviderEntry<? extends ItemLike, ?> result) {
+        return create(result::get);
+    }
+
+    static GeneratedRecipeBuilder create(ItemLike result) {
+        return create(() -> result);
+    }
+
+    GeneratedRecipeBuilder.GeneratedRecipe copycat(ItemProviderEntry<? extends ItemLike, ?> result, int resultCount) {
+        if (result.get() instanceof ICopycatBlock) {
+            copycatsWithRecipes.add((Block) result.get());
+        }
+
+        return create(result)
+                .unlockedBy(AllItems.ZINC_INGOT::get)
+                .returns(resultCount)
+                .requiresResultFeature()
+                .viaStonecuttingTag(TaggedIngredients.ZINC::getTag)
+                .create();
+    }
+
+    GeneratedRecipeBuilder.GeneratedRecipe copycatWithBaseItem(ItemProviderEntry<? extends ItemLike, ?> base, ItemProviderEntry<? extends ItemLike, ?> result, int resultCount) {
+        if (result.get() instanceof ICopycatBlock) {
+            copycatsWithRecipes.add((Block) result.get());
+        }
+
+        return create(result)
+                .unlockedBy(base)
+                .returns(resultCount)
+                .requiresResultFeature()
+                .viaShapeless(b -> b.requires(base, resultCount).requires(AllItems.ZINC_INGOT));
+    }
+
+    GeneratedRecipeBuilder.GeneratedRecipe copycatWithBaseItem(ItemLike base, ItemProviderEntry<? extends ItemLike, ?> result, int resultCount) {
+        if (result.get() instanceof ICopycatBlock) {
+            copycatsWithRecipes.add((Block) result.get());
+        }
+
+        return create(result)
+                .unlockedBy(() -> base)
+                .returns(resultCount)
+                .requiresResultFeature()
+                .viaShapeless(b -> b.requires(base, resultCount).requires(AllItems.ZINC_INGOT));
+    }
+
+    @SafeVarargs
+    final GeneratedRecipe conversionCycle(ItemProviderEntry<? extends ItemLike, ?>... cycle) {
+        GeneratedRecipe result = null;
+        for (int i = 0; i < cycle.length; i++) {
+            ItemProviderEntry<? extends ItemLike,?> currentEntry = cycle[i];
+            ItemProviderEntry<? extends ItemLike,?> nextEntry = cycle[(i + 1) % cycle.length];
+            result = create(nextEntry).withSuffix("_from_conversion")
+                    .unlockedBy(currentEntry::get)
+                    .requiresFeature(currentEntry.getId())
+                    .requiresFeature(nextEntry.getId())
+                    .viaShapeless(b -> b.requires(currentEntry.get()));
+        }
+        return result;
+    }
+
+    public CCStandardRecipes(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
+        super(output, registries);
+
+        List<ResourceLocation> missingRecipes = new LinkedList<>();
+        for (RegistryEntry<? extends Block,?> entry : CCBlocks.getAllRegisteredBlocksWithoutWrapped()) {
+            if (!blocksWithoutRecipe.contains(entry)) {
+                if (!copycatsWithRecipes.contains(entry.get()))
+                    missingRecipes.add(entry.getId());
+            }
+        }
+        if (!missingRecipes.isEmpty()) {
+            throw new AssertionError("The following copycats do not have a crafting recipe: \n" + missingRecipes.stream().map(ResourceLocation::toString).collect(Collectors.joining(", ")));
+        }
+    }
+
+    public enum TaggedIngredients {
+        ZINC(CCTags.commonItemTag("ingots/zinc"), CCTags.commonItemTag("zinc_ingots"));
+
+
+        private final TagKey<Item> neoforge;
+        private final TagKey<Item> fabric;
+
+        TaggedIngredients(TagKey<Item> neoforge, TagKey<Item> fabric) {
+            this.neoforge = neoforge;
+            this.fabric = fabric;
+        }
+
+        public TagKey<Item> getTag() {
+            return Platform.getCurrent().equals(Platform.NEOFORGE) ? this.neoforge : this.fabric;
+        }
+    }
+}
