@@ -143,6 +143,7 @@ public class FeatureToggle {
                     if (cachedParameters != null) {
                         CreativeModeTabsAccessor.callBuildAllTabContents(cachedParameters);
                     }
+                    Mods.JEI.executeIfInstalled(() -> com.copycatsplus.copycats.compat.recipe_viewers.CopycatsJEI::refreshItemList);
                 })
         );
     }

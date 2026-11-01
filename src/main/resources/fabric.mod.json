@@ -14,7 +14,8 @@
   "environment": "*",
   "entrypoints": {
     "main": ["com.copycatsplus.copycats.fabric.CopycatsImpl"],
-    "client": ["com.copycatsplus.copycats.fabric.CopycatsClientImpl"]
+    "client": ["com.copycatsplus.copycats.fabric.CopycatsClientImpl"],
+    "jei_mod_plugin": ["com.copycatsplus.copycats.compat.recipe_viewers.CopycatsJEI"]
   },
   "accessWidener": "copycats.accesswidener",
   "mixins": ["copycats-common.mixins.json", "copycats-fabric.mixins.json"],
