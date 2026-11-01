@@ -7,6 +7,10 @@
   "mixins": [
     "port.SmartBlockEntityMixin",
     "port.SpawnPlacementsAccessor",
+    "light.BlockLightEngineMixin",
+    "light.BlockStarLightEngineMixin",
+    "light.ChunkAccessMixin",
+    "light.LightEngineAccessor",
     "copycat.SyncedBlockEntityMixin",
     "copycat.VoxelShapeAccessor",
     "copycat.cogwheel.CogWheelBlockItemMixin",

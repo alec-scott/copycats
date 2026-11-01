@@ -1,5 +1,7 @@
 package com.copycatsplus.copycats.utility.fabric;
 
+import com.zurrtum.create.catnip.levelWrappers.SchematicLevel;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class BlockEntityUtilsImpl {
@@ -7,8 +9,14 @@ public class BlockEntityUtilsImpl {
         // no-op: Fabric models read the block entity at meshing time, and redraw() sends a block update
     }
 
+    /**
+     * PORT-NOTE(26.1): re-check the block's light; the light engine mixins read the material's emission
+     * (see CopycatLight).
+     */
     public static void updateLight(BlockEntity blockEntity) {
-        // PORT-NOTE: NeoForge's AuxiliaryLightManager gave copycats their material's light level. Fabric has no
-        // per-position light emission, so (as with Create Fly's own copycats) glowing materials don't emit light.
+        Level level = blockEntity.getLevel();
+        if (level == null || level instanceof SchematicLevel)
+            return;
+        level.getLightEngine().checkBlock(blockEntity.getBlockPos());
     }
 }

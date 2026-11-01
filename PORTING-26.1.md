@@ -45,13 +45,16 @@ Create Fly comes from the local checkout's jar (`create_fly_jar` in `gradle.prop
 - **Networking**: Fabric payloads (config sync S2C, fill-copycat C2S).
 - **Recipes**: NeoForge's `copycats:feature_enabled` condition is a Fabric resource condition
   (`config/fabric/FeatureEnabledCondition`); recipes and advancements converted by `porting-tools/convert_data_26.pl`.
+- **Light from materials** (`foundation/copycat/CopycatLight`): Fabric has no per-position light emission, so
+  mixins at the points where the light engines read a block's emission (vanilla `BlockLightEngine`, `ChunkAccess`
+  source scan, and Starlight's `BlockStarLightEngine` for ScalableLux) look up the copycat's block entity in the
+  chunk; `BlockEntityUtils.updateLight` re-checks the block when the material changes.
 - **Copy cat**: data-driven cat variant (`data/copycats/cat_variant/copy_cat.json`, never spawns naturally); kittens
   use the all-black kitten texture (no copy cat kitten texture exists).
 - **Dropped**:
   - compat with mods that have no 26.1 Fabric build (JEI/EMI refresh, Rubidium, Radium, Diagonal Blocks, Vertical
     Slabs Compat, Double Slabs, Additional Placements, Athena);
   - C:Connected / legacy-copycat migration (fresh 26.1 worlds only);
-  - light emission from glowing materials (Fabric has no per-position light; Create Fly's copycats don't either);
   - harvest-level, entity-destroy and landing/running particle hooks (no Fabric equivalent; Create Fly matches);
   - neighbour face culling against copycats (`Block.shouldRenderFace` lost its level/position in 26.1) and fluid
     face occlusion against copycats (same for `FluidRenderer`): only overdraw / water faces visible at copycat edges;
@@ -73,4 +76,6 @@ Create Fly comes from the local checkout's jar (`create_fly_jar` in `gradle.prop
       placement helper ghosts, kinetic copycats (with and without Flywheel), sliding/folding doors, fluid pipes,
       breaking particles, copy cat.
 - [ ] Multiplayer: config sync packet, fill-copycat packet.
-- [ ] Revisit: light emission, Sodium compat (if the server pack uses it).
+- [ ] Client test: glowing materials (vanilla engine and ScalableLux), light updating when a material changes or the
+      copycat is broken, relog/chunk reload keeps the light.
+- [ ] Revisit: Sodium compat (if the server pack uses it).
