@@ -43,7 +43,7 @@ public class CogWheelBlockItemMixin {
         if (state.getBlock() instanceof CopycatCogWheelBlock copycatBlock) {
             String property = copycatBlock.getPropertyFromInteraction(state, world, pos, context.getClickLocation(), context.getClickedFace(), true);
             if (property.equals(CopycatCogWheelBlock.Part.COGWHEEL.getSerializedName())
-                    && AllBlocks.COPYCAT_BASE.has(IMultiStateCopycatBlock.getMaterial(world, pos, property))
+                    && IMultiStateCopycatBlock.getMaterial(world, pos, property).is(AllBlocks.COPYCAT_BASE)
                     && cogWheelBlock.isLargeCog() == copycatBlock.isLargeCog()) {
                 cir.setReturnValue(InteractionResult.PASS);
             }

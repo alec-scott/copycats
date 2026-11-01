@@ -5,14 +5,10 @@
   "plugin": "com.copycatsplus.copycats.mixin.MixinPlugin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "foundation.copycat.CopycatBlockEntityMixin",
     "foundation.copycat.CopycatBlockMixin",
-    "foundation.copycat.multistate.MultiStateCopycatBlockEntityMixin",
     "foundation.copycat.multistate.MultiStateCopycatBlockMixin"
   ],
-  "client": [
-    "featuretoggle.SubMenuConfigScreenMixin"
-  ],
+  "client": [],
   "injectors": {
     "defaultRequire": 1
   }

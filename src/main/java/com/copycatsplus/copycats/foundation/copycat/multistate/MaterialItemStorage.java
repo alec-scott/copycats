@@ -2,14 +2,13 @@ package com.copycatsplus.copycats.foundation.copycat.multistate;
 
 import com.copycatsplus.copycats.utility.ItemUtils;
 import com.zurrtum.create.AllBlocks;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentPatch;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -27,7 +26,7 @@ public class MaterialItemStorage {
     private MaterialItemStorage(Set<String> properties) {
         storage = new HashMap<>(properties.size());
         for (String property : properties) {
-            storage.put(property, new MaterialItem(AllBlocks.COPYCAT_BASE.getDefaultState(), ItemStack.EMPTY));
+            storage.put(property, new MaterialItem(AllBlocks.COPYCAT_BASE.defaultBlockState(), ItemStack.EMPTY));
         }
     }
 
@@ -102,23 +101,22 @@ public class MaterialItemStorage {
         storage = newStorage;
     }
 
-    public CompoundTag serialize(HolderLookup.Provider registries) {
-        CompoundTag root = new CompoundTag();
-        storage.forEach((key, materialItem) -> root.put(key, materialItem.serialize(registries)));
-        return root;
+    private static final Codec<Map<String, MaterialItem>> STORAGE_CODEC = Codec.unboundedMap(Codec.STRING, MaterialItem.CODEC);
+
+    public void write(ValueOutput view, String key) {
+        view.store(key, STORAGE_CODEC, storage);
     }
 
-    public CompoundTag serializeSafe(HolderLookup.Provider registries) {
-        CompoundTag root = new CompoundTag();
-        storage.forEach((key, materialItem) -> root.put(key, materialItem.serializeSafe(registries)));
-        return root;
+    public void writeSafe(ValueOutput view, String key) {
+        Map<String, MaterialItem> safe = new HashMap<>();
+        storage.forEach((k, materialItem) -> safe.put(k, materialItem.withoutComponents()));
+        view.store(key, STORAGE_CODEC, safe);
     }
 
-    public boolean deserialize(CompoundTag tag, HolderLookup.Provider registries) {
+    public boolean read(ValueInput view, String key) {
         AtomicBoolean anyUpdated = new AtomicBoolean(false);
-        tag.getAllKeys().forEach(key -> {
-            MaterialItem newVersion = MaterialItem.deserialize(tag.getCompound(key), registries);
-            MaterialItem oldVersion = storage.put(key, newVersion);
+        view.read(key, STORAGE_CODEC).orElse(Map.of()).forEach((k, newVersion) -> {
+            MaterialItem oldVersion = storage.put(k, newVersion);
             if (oldVersion != null &&
                     (newVersion.material() != oldVersion.material() || newVersion.enableCT() != oldVersion.enableCT()) &&
                     !anyUpdated.get()) {
@@ -151,29 +149,15 @@ public class MaterialItemStorage {
             this.enableCT = enableCT;
         }
 
-        public CompoundTag serialize(HolderLookup.Provider registries) {
-            CompoundTag root = new CompoundTag();
-            root.put("material", NbtUtils.writeBlockState(material));
-            root.put("consumedItem", ItemUtils.serializeNBT(consumedItem, registries));
-            root.putBoolean("enableCT", enableCT);
-            return root;
-        }
+        // PORT-NOTE(26.1): NBT layout kept (material, consumedItem, enableCT) so existing copycats load
+        public static final Codec<MaterialItem> CODEC = RecordCodecBuilder.create(i -> i.group(
+                BlockState.CODEC.fieldOf("material").forGetter(MaterialItem::material),
+                ItemStack.OPTIONAL_CODEC.optionalFieldOf("consumedItem", ItemStack.EMPTY).forGetter(MaterialItem::consumedItem),
+                Codec.BOOL.optionalFieldOf("enableCT", true).forGetter(MaterialItem::enableCT)
+        ).apply(i, MaterialItem::new));
 
-        public CompoundTag serializeSafe(HolderLookup.Provider registries) {
-            CompoundTag root = new CompoundTag();
-            root.put("material", NbtUtils.writeBlockState(material));
-            ItemStack stackWithoutComponents = new ItemStack(consumedItem.getItemHolder(), consumedItem.getCount(), DataComponentPatch.EMPTY);
-            root.put("consumedItem", ItemUtils.serializeNBT(stackWithoutComponents, registries));
-            root.putBoolean("enableCT", enableCT);
-            return root;
-        }
-
-        public static MaterialItem deserialize(CompoundTag tag, HolderLookup.Provider registries) {
-            return new MaterialItem(
-                    NbtUtils.readBlockState(BuiltInRegistries.BLOCK.asLookup(), tag.getCompound("material")),
-                    ItemStack.parseOptional(registries, tag.getCompound("consumedItem")),
-                    !tag.contains("enableCT") || tag.getBoolean("enableCT")
-            );
+        public MaterialItem withoutComponents() {
+            return new MaterialItem(material, new ItemStack(consumedItem.typeHolder(), consumedItem.getCount(), DataComponentPatch.EMPTY), enableCT);
         }
 
         public BlockState material() {
@@ -201,7 +185,7 @@ public class MaterialItemStorage {
         }
 
         public boolean hasCustomMaterial() {
-            return !material.is(AllBlocks.COPYCAT_BASE.get());
+            return !material.is(AllBlocks.COPYCAT_BASE);
         }
     }
 

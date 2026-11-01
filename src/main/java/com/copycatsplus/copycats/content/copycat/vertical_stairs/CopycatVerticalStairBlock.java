@@ -1,5 +1,11 @@
 package com.copycatsplus.copycats.content.copycat.vertical_stairs;
 
+import net.minecraft.world.level.ScheduledTickAccess;
+
+import net.minecraft.world.level.LevelReader;
+
+import net.minecraft.util.RandomSource;
+
 import com.copycatsplus.copycats.CCBlockStateProperties;
 import com.copycatsplus.copycats.CCBlockStateProperties.Side;
 import com.copycatsplus.copycats.CCBlockStateProperties.VerticalStairShape;
@@ -14,12 +20,11 @@ import com.copycatsplus.copycats.foundation.copycat.IStateType;
 import com.copycatsplus.copycats.utility.BlockUtils;
 import com.zurrtum.create.content.contraptions.StructureTransform;
 import com.zurrtum.create.catnip.data.Iterate;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.AxisDirection;
 import net.minecraft.world.item.context.BlockPlaceContext;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.BlockAndLightGetter;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
@@ -31,7 +36,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 
 
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.Half;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -45,11 +50,10 @@ import static net.minecraft.world.level.block.StairBlock.HALF;
 
 @SuppressWarnings("deprecation")
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class CopycatVerticalStairBlock extends CCWaterloggedCopycatBlock implements ICustomCTBlocking, IStateType {
 
     // Facing refers to the direction of the base of the stairs
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final EnumProperty<Side> SIDE = CCBlockStateProperties.SIDE;
     public static final EnumProperty<VerticalStairShape> SHAPE = CCBlockStateProperties.VERTICAL_STAIR_SHAPE;
 
@@ -88,8 +92,8 @@ public class CopycatVerticalStairBlock extends CCWaterloggedCopycatBlock impleme
     }
 
     @Override
-    public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
-        BlockState newState = super.updateShape(state, direction, neighborState, level, pos, neighborPos);
+    public BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random) {
+        BlockState newState = super.updateShape(state, level, ticks, pos, direction, neighborPos, neighborState, random);
         if (direction.getAxis() != newState.getValue(FACING).getAxis()) {
             return newState.setValue(SHAPE, getStairsShape(newState, level, pos));
         } else {
@@ -235,14 +239,14 @@ public class CopycatVerticalStairBlock extends CCWaterloggedCopycatBlock impleme
     }
 
     @Override
-    public Optional<Boolean> isCTBlocked(BlockAndTintGetter reader, BlockState state, BlockPos pos, BlockPos connectingPos, BlockPos blockingPos, Direction face) {
+    public Optional<Boolean> isCTBlocked(BlockAndLightGetter reader, BlockState state, BlockPos pos, BlockPos connectingPos, BlockPos blockingPos, Direction face) {
         if (!getFaceShape(state, face).canConnect())
             return Optional.of(false);
         return Optional.empty();
     }
 
     @Override
-    public Optional<Boolean> blockCTTowards(BlockAndTintGetter reader, BlockState state, BlockPos pos, BlockPos ctPos, BlockPos connectingPos, Direction face) {
+    public Optional<Boolean> blockCTTowards(BlockAndLightGetter reader, BlockState state, BlockPos pos, BlockPos ctPos, BlockPos connectingPos, Direction face) {
         FaceShape sideShape = getFaceShape(state, face);
         Direction facing = state.getValue(FACING);
         if (!sideShape.canConnect()) return Optional.of(false);

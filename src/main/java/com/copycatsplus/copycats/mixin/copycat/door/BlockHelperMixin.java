@@ -3,7 +3,7 @@ package com.copycatsplus.copycats.mixin.copycat.door;
 import com.zurrtum.create.foundation.utility.BlockHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -26,7 +26,7 @@ public class BlockHelperMixin {
     private static void placeSchematicBlock(Level world, BlockState state, BlockPos target, ItemStack stack, CompoundTag data, CallbackInfo ci) {
         BlockEntity existingBlockEntity = world.getBlockEntity(target);
         if (existingBlockEntity != null && existingBlockEntity.getBlockState().getBlock().equals(state.getBlock())) {
-            ResourceLocation resourceLocation = BlockEntityType.getKey(existingBlockEntity.getType());
+            Identifier resourceLocation = net.minecraft.core.registries.BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(existingBlockEntity.getType());
             assert resourceLocation != null;
             data.putString("id", resourceLocation.toString());
         }

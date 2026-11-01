@@ -6,8 +6,9 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.CardinalLighting;
 import net.minecraft.core.Direction;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -51,13 +52,13 @@ public class FilteredBlockAndTintGetter implements BlockAndTintGetter {
     }
 
     @Override
-    public int getMinBuildHeight() {
-        return wrapped.getMinBuildHeight();
+    public int getMinY() {
+        return wrapped.getMinY();
     }
 
     @Override
-    public float getShade(@NotNull Direction pDirection, boolean pShade) {
-        return wrapped.getShade(pDirection, pShade);
+    public @NotNull CardinalLighting cardinalLighting() {
+        return wrapped.cardinalLighting();
     }
 
     @Override

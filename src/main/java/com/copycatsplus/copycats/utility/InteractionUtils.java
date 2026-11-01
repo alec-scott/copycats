@@ -2,11 +2,9 @@ package com.copycatsplus.copycats.utility;
 
 import com.zurrtum.create.catnip.placement.IPlacementHelper;
 import com.zurrtum.create.catnip.placement.PlacementHelpers;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -18,7 +16,6 @@ import java.util.function.Supplier;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
-@MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class InteractionUtils {
     /**
@@ -39,29 +36,29 @@ public class InteractionUtils {
      * Sequentially runs a list of handlers until one consumes the action.
      */
     @SafeVarargs
-    public static ItemInteractionResult sequentialItem(Supplier<ItemInteractionResult>... handlers) {
-        for (Supplier<ItemInteractionResult> handler : handlers) {
-            ItemInteractionResult result = handler.get();
+    public static InteractionResult sequentialItem(Supplier<InteractionResult>... handlers) {
+        for (Supplier<InteractionResult> handler : handlers) {
+            InteractionResult result = handler.get();
             if (result.consumesAction()) {
                 return result;
             }
         }
-        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        return InteractionResult.TRY_WITH_EMPTY_HAND;
     }
 
     /**
      * Handles the use action with a registered placement helper.
      */
-    public static ItemInteractionResult usePlacementHelper(int placementHelperId, ItemStack heldItem, BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult ray) {
+    public static InteractionResult usePlacementHelper(int placementHelperId, ItemStack heldItem, BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult ray) {
         if (!player.isShiftKeyDown() && player.mayBuild()) {
             IPlacementHelper placementHelper = PlacementHelpers.get(placementHelperId);
             if (placementHelper.matchesItem(heldItem)) {
                 placementHelper.getOffset(player, world, state, pos, ray)
-                        .placeInWorld(world, (BlockItem) heldItem.getItem(), player, hand, ray);
-                return ItemInteractionResult.SUCCESS;
+                        .placeInWorld(world, (BlockItem) heldItem.getItem(), player, hand);
+                return InteractionResult.SUCCESS;
             }
         }
-        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        return InteractionResult.TRY_WITH_EMPTY_HAND;
     }
 
     public static AttributeInstance getPlayerReach(Player player) {

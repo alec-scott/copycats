@@ -14,15 +14,14 @@ import com.copycatsplus.copycats.utility.BlockEntityUtils;
 import com.copycatsplus.copycats.utility.BlockFaceUtils;
 import com.zurrtum.create.AllBlocks;
 import com.zurrtum.create.AllItems;
-import com.simibubi.create.AllTags;
+import com.zurrtum.create.AllBlockTags;
+import com.zurrtum.create.AllItemTags;
 import com.zurrtum.create.content.contraptions.StructureTransform;
 import com.zurrtum.create.content.schematics.requirement.ItemRequirement;
 import com.zurrtum.create.foundation.block.IBE;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
@@ -30,7 +29,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -45,7 +43,6 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.neoforged.neoforge.common.Tags;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -77,7 +74,6 @@ import java.util.stream.IntStream;
  * the implementation of copycats.
  */
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public interface IMultiStateCopycatBlock extends ICopycatBlock, IStateType {
 
     @Override
@@ -147,9 +143,9 @@ public interface IMultiStateCopycatBlock extends ICopycatBlock, IStateType {
                                               boolean targetingSolid) {
         // Relativize the hit vector around the player position
         if (targetingSolid) {
-            hitVec = hitVec.subtract(Vec3.atLowerCornerOf(face.getNormal()).scale(0.05));
+            hitVec = hitVec.subtract(Vec3.atLowerCornerOf(face.getUnitVec3i()).scale(0.05));
         } else {
-            hitVec = hitVec.add(Vec3.atLowerCornerOf(face.getNormal()).scale(0.05));
+            hitVec = hitVec.add(Vec3.atLowerCornerOf(face.getUnitVec3i()).scale(0.05));
         }
         hitVec = hitVec.add(-pos.getX(), -pos.getY(), -pos.getZ());
         Vec3 unscaledHit = hitVec;
@@ -244,7 +240,7 @@ public interface IMultiStateCopycatBlock extends ICopycatBlock, IStateType {
         context.getLevel()
                 .levelEvent(2001, context.getClickedPos(), Block.getId(material.material()));
 
-        copycatBE.setMaterial(property, AllBlocks.COPYCAT_BASE.getDefaultState());
+        copycatBE.setMaterial(property, AllBlocks.COPYCAT_BASE.defaultBlockState());
         copycatBE.setConsumedItem(property, ItemStack.EMPTY);
         return InteractionResult.SUCCESS;
     }
@@ -255,18 +251,18 @@ public interface IMultiStateCopycatBlock extends ICopycatBlock, IStateType {
     }
 
     @Override
-    default ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+    default InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         // prioritize wrench interactions over others
-        if (stack.is(Tags.Items.TOOLS_WRENCH)) {
-            InteractionResult result = AllItems.WRENCH.get().useOn(new UseOnContext(player, hand, hitResult));
-            if (result.indicateItemUse())
+        if (stack.is(AllItemTags.TOOLS_WRENCH)) {
+            InteractionResult result = AllItems.WRENCH.useOn(new UseOnContext(player, hand, hitResult));
+            if (result.consumesAction())
                 player.swing(hand);
             if (result.consumesAction())
-                return ItemInteractionResult.CONSUME;
+                return InteractionResult.CONSUME;
         }
 
         if (player == null || !player.mayBuild())
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+            return InteractionResult.TRY_WITH_EMPTY_HAND;
 
         String property = getPropertyFromInteraction(state, level, pos, hitResult, true);
 
@@ -276,31 +272,31 @@ public interface IMultiStateCopycatBlock extends ICopycatBlock, IStateType {
         if (material != null)
             material = prepareMaterial(level, pos, state, player, hand, hitResult, material);
         if (material == null)
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+            return InteractionResult.TRY_WITH_EMPTY_HAND;
 
         IMultiStateCopycatBlockEntity copycatBE = getCopycatBlockEntity(level, pos);
         if (copycatBE == null)
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+            return InteractionResult.TRY_WITH_EMPTY_HAND;
         if (!partExists(state, property))
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+            return InteractionResult.TRY_WITH_EMPTY_HAND;
         if (copycatBE.getMaterialItemStorage().getMaterialItem(property).material()
                 .is(material.getBlock())) {
             if (!copycatBE.cycleMaterial(property))
-                return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+                return InteractionResult.TRY_WITH_EMPTY_HAND;
             copycatBE.getLevel()
                     .playSound(null, copycatBE.getBlockPos(), SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, .75f,
                             .95f);
-            return ItemInteractionResult.SUCCESS;
+            return InteractionResult.SUCCESS;
         }
         if (copycatBE.getMaterialItemStorage().hasCustomMaterial(property))
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+            return InteractionResult.TRY_WITH_EMPTY_HAND;
 
         if (level.isClientSide()) {
             if (CCKeys.FILL_COPYCAT.isPressed()) {
                 fillEmptyParts(level, pos, state, material);
-                CCPackets.network().sendToServer(new FillCopycatPacket(pos, material, property));
+                CCPackets.sendToServer(new FillCopycatPacket(pos, material, property));
             }
-            return ItemInteractionResult.SUCCESS;
+            return InteractionResult.SUCCESS;
         }
 
         boolean freeToApply = copycatBE.getMaterialItemStorage().getAllConsumedItems().stream().anyMatch(s -> s.getItem() == stack.getItem());
@@ -313,13 +309,13 @@ public interface IMultiStateCopycatBlock extends ICopycatBlock, IStateType {
                         .getPlaceSound(), SoundSource.BLOCKS, 1, .75f);
 
         if (player.isCreative())
-            return ItemInteractionResult.SUCCESS;
+            return InteractionResult.SUCCESS;
 
         if (!freeToApply)
             stack.shrink(1);
         if (stack.isEmpty())
             player.setItemInHand(hand, ItemStack.EMPTY);
-        return ItemInteractionResult.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
     @Override
@@ -363,18 +359,7 @@ public interface IMultiStateCopycatBlock extends ICopycatBlock, IStateType {
     /**
      * Implementation note: super.onRemove should be passed in as the onRemove handler.
      */
-    @Override
-    default void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving, OnRemoveHandler handler) {
-        if (!state.hasBlockEntity() || state.getBlock() == newState.getBlock())
-            return;
-        if (!isMoving) {
-            IMultiStateCopycatBlockEntity copycatBE = getCopycatBlockEntity(level, pos);
-            if (copycatBE != null)
-                copycatBE.getMaterialItemStorage().getAllConsumedItems().forEach(stack -> Block.popResource(level, pos, stack));
-        }
-        handler.handle(state, level, pos, newState, isMoving);
-        level.removeBlockEntity(pos);
-    }
+    // PORT-NOTE(26.1): see ICopycatBlock; IMultiStateCopycatBlockEntity.dropConsumedItems drops the consumed items
 
     @Override
     default BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
@@ -396,10 +381,10 @@ public interface IMultiStateCopycatBlock extends ICopycatBlock, IStateType {
         }
     }
 
-    static BlockState getAppearance(IMultiStateCopycatBlock block, BlockState state, BlockAndTintGetter level, BlockPos pos, Direction side,
+    static BlockState getAppearance(IMultiStateCopycatBlock block, BlockState state, BlockAndLightGetter level, BlockPos pos, Direction side,
                                     @Nullable BlockState queryState, @Nullable BlockPos queryPos) {
 
-        BlockAndTintGetter reader = Mods.ATHENA.runIfInstalled(() -> () -> AthenaCompat.unwrapAthenaGetter(level)).orElse(level);
+        BlockAndLightGetter reader = Mods.ATHENA.runIfInstalled(() -> () -> AthenaCompat.unwrapAthenaGetter(level)).orElse(level);
 
         if (reader instanceof ScaledBlockAndTintGetter scaledLevel && state.getBlock() instanceof IMultiStateCopycatBlock) {
             CopycatExternalContext.setPropertyForAppearance(scaledLevel.getPropertyForRender(state, pos));
@@ -415,7 +400,7 @@ public interface IMultiStateCopycatBlock extends ICopycatBlock, IStateType {
         if (property == null)
             property = block.defaultProperty();
         BlockState material = IMultiStateCopycatBlock.getMaterial(reader, pos, property);
-        return material.is(Blocks.AIR) ? AllBlocks.COPYCAT_BASE.getDefaultState() : material;
+        return material.is(Blocks.AIR) ? AllBlocks.COPYCAT_BASE.defaultBlockState() : material;
     }
 
     /**
@@ -457,7 +442,7 @@ public interface IMultiStateCopycatBlock extends ICopycatBlock, IStateType {
      * @param state   The state of the copycat block part.
      * @return Whether the copycat block part can connect its textures towards the adjacent block/part.
      */
-    default boolean canConnectTexturesToward(String property, BlockAndTintGetter reader, BlockPos fromPos, BlockPos toPos,
+    default boolean canConnectTexturesToward(String property, BlockAndLightGetter reader, BlockPos fromPos, BlockPos toPos,
                                              BlockState state) {
         return canConnectTexturesToward(reader, fromPos, toPos, state);
     }
@@ -481,7 +466,7 @@ public interface IMultiStateCopycatBlock extends ICopycatBlock, IStateType {
      */
     default boolean canOcclude(String property, BlockGetter level, BlockState state, BlockPos pos) {
         BlockState material = getMaterial(level, pos, property);
-        if (AllBlocks.COPYCAT_BASE.has(material)) return false; // copycat_base is incorrectly set to occlude
+        if (material.is(AllBlocks.COPYCAT_BASE)) return false; // copycat_base is incorrectly set to occlude
         return material.canOcclude();
     }
 
@@ -491,44 +476,4 @@ public interface IMultiStateCopycatBlock extends ICopycatBlock, IStateType {
         return Optional.of(BlockFaceUtils.canOcclude(level, neighborState, neighborPos, state, pos, dir.getOpposite()));
     }
 
-    @Environment(EnvType.CLIENT)
-    static BlockColor wrappedColor() {
-        return new WrappedBlockColor();
-    }
-
-    @Environment(EnvType.CLIENT)
-    class WrappedBlockColor implements BlockColor {
-
-        @Override
-        public int getColor(BlockState pState, @Nullable BlockAndTintGetter pLevel, @Nullable BlockPos pPos,
-                            int pTintIndex) {
-            if (pLevel == null || pPos == null)
-                return GrassColor.get(0.5D, 1.0D);
-
-            String renderingProperty = CopycatExternalContext.getPropertyForBlockColor();
-            if (renderingProperty != null) {
-                return Minecraft.getInstance()
-                        .getBlockColors()
-                        .getColor(getMaterial(pLevel, pPos, renderingProperty), pLevel, pPos, pTintIndex);
-            }
-
-            //First tint from first material
-            int tint = Minecraft.getInstance()
-                    .getBlockColors()
-                    .getColor(ICopycatBlock.getMaterial(pLevel, pPos), pLevel, pPos, pTintIndex);
-            BlockEntity be = pLevel.getBlockEntity(pPos);
-            if (tint == -1) {
-                if (be instanceof IMultiStateCopycatBlockEntity mscb) {
-                    for (String property : mscb.getMaterialItemStorage().getAllProperties()) {
-                        int anyTint = Minecraft.getInstance()
-                                .getBlockColors()
-                                .getColor(getMaterial(pLevel, pPos, property), pLevel, pPos, pTintIndex);
-                        if (anyTint != -1)
-                            return anyTint;
-                    }
-                }
-            }
-            return tint;
-        }
-    }
 }

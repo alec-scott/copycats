@@ -15,13 +15,11 @@ import com.zurrtum.create.content.kinetics.steamEngine.PoweredShaftBlock;
 import com.zurrtum.create.foundation.placement.PoleHelper;
 import com.zurrtum.create.catnip.placement.PlacementHelpers;
 import com.zurrtum.create.catnip.placement.PlacementOffset;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -41,7 +39,6 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class CopycatShaftBlock extends ShaftBlock implements ICopycatBlock, ICustomCTBlocking {
 
     public static final int placementHelperId = PlacementHelpers.register(new PlacementHelper());
@@ -51,7 +48,7 @@ public class CopycatShaftBlock extends ShaftBlock implements ICopycatBlock, ICus
     }
 
     @Override
-    public boolean canToggleCT(BlockState state, BlockAndTintGetter level, BlockPos pos) {
+    public boolean canToggleCT(BlockState state, BlockAndLightGetter level, BlockPos pos) {
         return false;
     }
 
@@ -80,7 +77,7 @@ public class CopycatShaftBlock extends ShaftBlock implements ICopycatBlock, ICus
     }
 
     @Override
-    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+    public InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         return InteractionUtils.sequentialItem(
                 () -> ICopycatBlock.super.useItemOn(stack, state, level, pos, player, hand, hitResult),
                 () -> super.useItemOn(stack, state, level, pos, player, hand, hitResult)
@@ -109,11 +106,6 @@ public class CopycatShaftBlock extends ShaftBlock implements ICopycatBlock, ICus
     }
 
     @Override
-    public void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
-        ICopycatBlock.super.onRemove(pState, pLevel, pPos, pNewState, pIsMoving, super::onRemove);
-    }
-
-    @Override
     public BlockState playerWillDestroy(@NotNull Level level, @NotNull BlockPos pos, @NotNull BlockState state, @NotNull Player player) {
         super.playerWillDestroy(level, pos, state, player);
         ICopycatBlock.super.playerWillDestroy(level, pos, state, player);
@@ -126,25 +118,25 @@ public class CopycatShaftBlock extends ShaftBlock implements ICopycatBlock, ICus
     }
 
     @Override
-    public boolean isIgnoredConnectivitySide(BlockAndTintGetter reader, BlockState state, Direction face, BlockPos fromPos, @Nullable BlockPos toPos, @Nullable BlockState toState) {
+    public boolean isIgnoredConnectivitySide(BlockAndLightGetter reader, BlockState state, Direction face, BlockPos fromPos, @Nullable BlockPos toPos, @Nullable BlockState toState) {
         return true;
     }
 
     @Override
-    public boolean canConnectTexturesToward(BlockAndTintGetter reader, BlockPos fromPos, BlockPos toPos, BlockState state) {
+    public boolean canConnectTexturesToward(BlockAndLightGetter reader, BlockPos fromPos, BlockPos toPos, BlockState state) {
         Vec3i diff = toPos.subtract(fromPos);
-        Direction face = Direction.fromDelta(diff.getX(), diff.getY(), diff.getZ());
+        Direction face = com.copycatsplus.copycats.utility.DirectionUtils.fromDelta(diff.getX(), diff.getY(), diff.getZ());
         if (face == null) return false;
         return face.getAxis() == state.getValue(AXIS);
     }
 
     @Override
-    public Optional<Boolean> blockCTTowards(BlockAndTintGetter reader, BlockState state, BlockPos pos, BlockPos ctPos, BlockPos connectingPos, Direction face) {
+    public Optional<Boolean> blockCTTowards(BlockAndLightGetter reader, BlockState state, BlockPos pos, BlockPos ctPos, BlockPos connectingPos, Direction face) {
         return Optional.of(false);
     }
 
     @Override
-    public Optional<Boolean> isCTBlocked(BlockAndTintGetter reader, BlockState state, BlockPos pos, BlockPos connectingPos, BlockPos blockingPos, Direction face) {
+    public Optional<Boolean> isCTBlocked(BlockAndLightGetter reader, BlockState state, BlockPos pos, BlockPos connectingPos, BlockPos blockingPos, Direction face) {
         return Optional.of(false);
     }
 
@@ -158,7 +150,6 @@ public class CopycatShaftBlock extends ShaftBlock implements ICopycatBlock, ICus
         return super.rotate(pState, pRot);
     }
 
-    @MethodsReturnNonnullByDefault
     private static class PlacementHelper extends PoleHelper<Direction.Axis> {
         // used for extending a shaft in its axis, like the piston poles. works with
         // shafts and cogs
@@ -176,7 +167,7 @@ public class CopycatShaftBlock extends ShaftBlock implements ICopycatBlock, ICus
 
         @Override
         public Predicate<BlockState> getStatePredicate() {
-            return Predicates.or(AllBlocks.SHAFT::has, AllBlocks.POWERED_SHAFT::has, CCBlocks.COPYCAT_SHAFT::has);
+            return Predicates.or(s -> s.is(AllBlocks.SHAFT), s -> s.is(AllBlocks.POWERED_SHAFT), CCBlocks.COPYCAT_SHAFT::has);
         }
 
         @Override

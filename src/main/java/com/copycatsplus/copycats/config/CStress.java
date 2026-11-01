@@ -7,9 +7,8 @@ import com.copycatsplus.copycats.port.registrate.util.nullness.NonNullUnaryOpera
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
 import com.copycatsplus.copycats.port.catnip.config.ConfigBase;
-import net.createmod.catnip.platform.CatnipServices;
 import com.zurrtum.create.catnip.registry.RegisteredObjectsHelper;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import org.jetbrains.annotations.NotNull;
@@ -22,10 +21,10 @@ import java.util.function.DoubleSupplier;
 
 public class CStress extends ConfigBase {
     private static final int VERSION = 1;
-    private static final Object2DoubleMap<ResourceLocation> DEFAULT_IMPACTS = new Object2DoubleOpenHashMap<>();
-    private static final Object2DoubleMap<ResourceLocation> DEFAULT_CAPACITIES = new Object2DoubleOpenHashMap<>();
-    protected final Map<ResourceLocation, ModConfigSpec.ConfigValue<Double>> capacities = new HashMap<>();
-    protected final Map<ResourceLocation, ModConfigSpec.ConfigValue<Double>> impacts = new HashMap<>();
+    private static final Object2DoubleMap<Identifier> DEFAULT_IMPACTS = new Object2DoubleOpenHashMap<>();
+    private static final Object2DoubleMap<Identifier> DEFAULT_CAPACITIES = new Object2DoubleOpenHashMap<>();
+    protected final Map<Identifier, ModConfigSpec.ConfigValue<Double>> capacities = new HashMap<>();
+    protected final Map<Identifier, ModConfigSpec.ConfigValue<Double>> impacts = new HashMap<>();
 
     public void registerAll(ModConfigSpec.Builder builder) {
         builder.comment(new String[]{".", Comments.su, Comments.impact}).push("impact");
@@ -41,7 +40,7 @@ public class CStress extends ConfigBase {
     }
 
     public @Nullable DoubleSupplier getImpact(Block block) {
-        ResourceLocation id = RegisteredObjectsHelper.getKeyOrThrow(block);
+        Identifier id = RegisteredObjectsHelper.getKeyOrThrow(block);
         ModConfigSpec.ConfigValue<Double> value = this.impacts.get(id);
         DoubleSupplier impactSupplier;
         if (value == null) {
@@ -55,7 +54,7 @@ public class CStress extends ConfigBase {
     }
 
     public @Nullable DoubleSupplier getCapacity(Block block) {
-        ResourceLocation id = RegisteredObjectsHelper.getKeyOrThrow(block);
+        Identifier id = RegisteredObjectsHelper.getKeyOrThrow(block);
         ModConfigSpec.ConfigValue<Double> value = this.capacities.get(id);
         DoubleSupplier capacitySupplier;
         if (value == null) {
@@ -75,7 +74,7 @@ public class CStress extends ConfigBase {
     public static <B extends Block, P> NonNullUnaryOperator<BlockBuilder<B, P>> setImpact(double value) {
         return (builder) -> {
             assertFromCreate(builder);
-            ResourceLocation id = Create.asResource(builder.getName());
+            Identifier id = Identifier.fromNamespaceAndPath("create", builder.getName());
             DEFAULT_IMPACTS.put(id, value);
             return builder;
         };
@@ -84,7 +83,7 @@ public class CStress extends ConfigBase {
     public static <B extends Block, P> NonNullUnaryOperator<BlockBuilder<B, P>> setCapacity(double value) {
         return (builder) -> {
             assertFromCreate(builder);
-            ResourceLocation id = Create.asResource(builder.getName());
+            Identifier id = Identifier.fromNamespaceAndPath("create", builder.getName());
             DEFAULT_CAPACITIES.put(id, value);
             return builder;
         };

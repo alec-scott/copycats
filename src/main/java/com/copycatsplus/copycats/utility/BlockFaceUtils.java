@@ -76,7 +76,7 @@ public class BlockFaceUtils {
             }
         }
         if (fromShape == null) {
-            fromShape = fromState.getFaceOcclusionShape(level, fromPos, fromFace);
+            fromShape = fromState.getFaceOcclusionShape(fromFace);
         }
         if (fromShape.isEmpty()) {
             return false;
@@ -134,7 +134,7 @@ public class BlockFaceUtils {
             }
         }
         if (toShape == null) {
-            toShape = toState.getFaceOcclusionShape(level, toPos, fromFace.getOpposite());
+            toShape = toState.getFaceOcclusionShape(fromFace.getOpposite());
         }
         CopycatExternalContext.setPropertyForAppearance(null);
         return invokeCachedOperation(operation, fromShape, toShape);
@@ -180,7 +180,7 @@ public class BlockFaceUtils {
         IMultiStateCopycatBlock copycatBlock = (IMultiStateCopycatBlock) state.getBlock();
         Vec3i scale = copycatBlock.vectorScale(state);
         Vec3i part = copycatBlock.getVectorFromProperty(state, property);
-        return getPartialFaceShape(state.getOcclusionShape(level, BlockPos.ZERO), face, part, scale);
+        return getPartialFaceShape(state.getOcclusionShape(), face, part, scale);
     }
 
     public static VoxelShape getPartialFaceShape(VoxelShape voxelShape, Direction direction, Vec3i part, Vec3i scale) {

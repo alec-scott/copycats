@@ -1,6 +1,5 @@
 package com.copycatsplus.copycats.foundation.copycat.model.kinetic;
 
-import dev.engine_room.flywheel.api.event.ReloadLevelRendererEvent;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collections;
@@ -29,7 +28,7 @@ public final class RendererReloadCache<T, U> {
     }
 
     @ApiStatus.Internal
-    public static void onReloadLevelRenderer(ReloadLevelRendererEvent e) {
+    public static void onReloadLevelRenderer() {
         for (RendererReloadCache<?, ?> cache : ALL) {
             cache.clear();
         }

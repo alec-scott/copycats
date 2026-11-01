@@ -7,17 +7,15 @@ import com.copycatsplus.copycats.foundation.copycat.IStateType;
 import com.copycatsplus.copycats.utility.InteractionUtils;
 import com.zurrtum.create.foundation.block.IBE;
 import com.zurrtum.create.catnip.data.Iterate;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.BlockAndLightGetter;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
@@ -33,7 +31,6 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class CopycatFenceBlock extends FenceBlock implements ICopycatBlock, IBE<CCCopycatBlockEntity>, IStateType {
 
     public CopycatFenceBlock(Properties properties) {
@@ -59,7 +56,7 @@ public class CopycatFenceBlock extends FenceBlock implements ICopycatBlock, IBE<
     }
 
     @Override
-    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+    public InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         return InteractionUtils.sequentialItem(
                 () -> ICopycatBlock.super.useItemOn(stack, state, level, pos, player, hand, hitResult),
                 () -> super.useItemOn(stack, state, level, pos, player, hand, hitResult)
@@ -79,11 +76,6 @@ public class CopycatFenceBlock extends FenceBlock implements ICopycatBlock, IBE<
 
     @SuppressWarnings("deprecation")
     @Override
-    public void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
-        ICopycatBlock.super.onRemove(pState, pLevel, pPos, pNewState, pIsMoving, super::onRemove);
-    }
-
-    @Override
     public BlockState playerWillDestroy(Level pLevel, BlockPos pPos, BlockState pState, Player pPlayer) {
         ICopycatBlock.super.playerWillDestroy(pLevel, pPos, pState, pPlayer);
         super.playerWillDestroy(pLevel, pPos, pState, pPlayer);
@@ -101,13 +93,13 @@ public class CopycatFenceBlock extends FenceBlock implements ICopycatBlock, IBE<
     }
 
     @Override
-    public boolean isIgnoredConnectivitySide(BlockAndTintGetter reader, BlockState state, Direction face, BlockPos fromPos, @javax.annotation.Nullable BlockPos toPos, @javax.annotation.Nullable BlockState toState) {
+    public boolean isIgnoredConnectivitySide(BlockAndLightGetter reader, BlockState state, Direction face, BlockPos fromPos, @javax.annotation.Nullable BlockPos toPos, @javax.annotation.Nullable BlockState toState) {
         if (isPole(state)) return ICopycatBlock.super.isIgnoredConnectivitySide(reader, state, face, fromPos, toPos, toState);
         return true;
     }
 
     @Override
-    public boolean canConnectTexturesToward(BlockAndTintGetter reader, BlockPos fromPos, BlockPos toPos, BlockState state) {
+    public boolean canConnectTexturesToward(BlockAndLightGetter reader, BlockPos fromPos, BlockPos toPos, BlockState state) {
         if (isPole(state)) return ICopycatBlock.super.canConnectTexturesToward(reader, fromPos, toPos, state);
         return false;
     }

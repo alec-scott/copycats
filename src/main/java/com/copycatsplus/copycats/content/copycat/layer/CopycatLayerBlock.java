@@ -9,7 +9,6 @@ import com.zurrtum.create.api.schematic.requirement.SpecialBlockItemRequirement;
 import com.zurrtum.create.content.contraptions.StructureTransform;
 import com.zurrtum.create.content.equipment.wrench.IWrenchable;
 import com.zurrtum.create.content.schematics.requirement.ItemRequirement;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -25,7 +24,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -39,10 +38,9 @@ import static com.copycatsplus.copycats.utility.BlockUtils.transformFacing;
 import static net.minecraft.core.Direction.UP;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class CopycatLayerBlock extends CCWaterloggedCopycatBlock implements SpecialBlockItemRequirement, IStateType {
 
-    public static final DirectionProperty FACING = BlockStateProperties.FACING;
+    public static final EnumProperty<Direction> FACING = BlockStateProperties.FACING;
     public static final IntegerProperty LAYERS = BlockStateProperties.LAYERS;
 
     public CopycatLayerBlock(Properties pProperties) {
@@ -95,7 +93,7 @@ public class CopycatLayerBlock extends CCWaterloggedCopycatBlock implements Spec
             }
             BlockPos up = pos.relative(Direction.UP);
             // need to call updateShape before setBlock to schedule a tick for water
-            world.setBlockAndUpdate(pos, state.setValue(LAYERS, state.getValue(LAYERS) - 1).updateShape(Direction.UP, world.getBlockState(up), world, pos, up));
+            world.setBlockAndUpdate(pos, state.setValue(LAYERS, state.getValue(LAYERS) - 1).updateShape(world, world, pos, Direction.UP, up, world.getBlockState(up), world.getRandom()));
             IWrenchable.playRemoveSound(world, pos);
         }
         return InteractionResult.SUCCESS;

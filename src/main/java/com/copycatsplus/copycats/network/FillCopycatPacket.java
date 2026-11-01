@@ -4,7 +4,7 @@ import com.copycatsplus.copycats.foundation.copycat.multistate.IMultiStateCopyca
 import io.netty.buffer.ByteBuf;
 import com.zurrtum.create.catnip.codecs.stream.CatnipStreamCodecBuilders;
 import com.zurrtum.create.catnip.codecs.stream.CatnipStreamCodecs;
-import net.createmod.catnip.net.base.ServerboundPacketPayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -21,7 +21,7 @@ import net.minecraft.world.level.block.state.BlockState;
  * Every part except the specified one will be filled. The specified part will be filled by the server-bound
  * item use packet.
  */
-public record FillCopycatPacket(BlockPos pos, BlockState material, String property) implements ServerboundPacketPayload {
+public record FillCopycatPacket(BlockPos pos, BlockState material, String property) implements CustomPacketPayload {
 
     public static final StreamCodec<ByteBuf, FillCopycatPacket> STREAM_CODEC = StreamCodec.composite(
             CatnipStreamCodecs.NULLABLE_BLOCK_POS, FillCopycatPacket::pos,
@@ -30,7 +30,6 @@ public record FillCopycatPacket(BlockPos pos, BlockState material, String proper
             FillCopycatPacket::new
     );
 
-    @Override
     public void handle(ServerPlayer sender) {
         Level level = sender.level();
         if (!level.isLoaded(pos)) return;
@@ -42,7 +41,7 @@ public record FillCopycatPacket(BlockPos pos, BlockState material, String proper
     }
 
     @Override
-    public PacketTypeProvider getTypeProvider() {
+    public Type<? extends CustomPacketPayload> type() {
         return CCPackets.FILL_COPYCAT;
     }
 }

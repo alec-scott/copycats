@@ -8,12 +8,10 @@ import com.zurrtum.create.content.decoration.bracket.BracketBlock;
 import com.zurrtum.create.content.fluids.pipes.FluidPipeBlock;
 import com.zurrtum.create.content.fluids.pipes.GlassFluidPipeBlock;
 import com.zurrtum.create.content.fluids.pipes.StraightPipeBlockEntity;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -34,7 +32,6 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Map;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class CopycatGlassFluidPipeBlock extends GlassFluidPipeBlock implements ICopycatBlock {
     public CopycatGlassFluidPipeBlock(Properties properties) {
         super(properties);
@@ -66,7 +63,7 @@ public class CopycatGlassFluidPipeBlock extends GlassFluidPipeBlock implements I
     }
 
     @Override
-    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+    public InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         return InteractionUtils.sequentialItem(
                 () -> ICopycatBlock.super.useItemOn(stack, state, level, pos, player, hand, hitResult),
                 () -> super.useItemOn(stack, state, level, pos, player, hand, hitResult)
@@ -90,11 +87,6 @@ public class CopycatGlassFluidPipeBlock extends GlassFluidPipeBlock implements I
     }
 
     @Override
-    public void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
-        ICopycatBlock.super.onRemove(pState, pLevel, pPos, pNewState, pIsMoving, super::onRemove);
-    }
-
-    @Override
     public BlockState playerWillDestroy(@NotNull Level level, @NotNull BlockPos pos, @NotNull BlockState state, @NotNull Player player) {
         super.playerWillDestroy(level, pos, state, player);
         ICopycatBlock.super.playerWillDestroy(level, pos, state, player);
@@ -102,17 +94,17 @@ public class CopycatGlassFluidPipeBlock extends GlassFluidPipeBlock implements I
     }
 
     @Override
-    public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader level, BlockPos pos, Player player) {
+    protected ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state, boolean includeData) {
         return CCBlocks.COPYCAT_FLUID_PIPE.asStack();
     }
 
     @Override
-    public boolean isIgnoredConnectivitySide(BlockAndTintGetter reader, BlockState state, Direction face, BlockPos fromPos, @Nullable BlockPos toPos, @Nullable BlockState toState) {
+    public boolean isIgnoredConnectivitySide(BlockAndLightGetter reader, BlockState state, Direction face, BlockPos fromPos, @Nullable BlockPos toPos, @Nullable BlockState toState) {
         return true;
     }
 
     @Override
-    public boolean canConnectTexturesToward(BlockAndTintGetter reader, BlockPos fromPos, BlockPos toPos, BlockState state) {
+    public boolean canConnectTexturesToward(BlockAndLightGetter reader, BlockPos fromPos, BlockPos toPos, BlockState state) {
         return false;
     }
 

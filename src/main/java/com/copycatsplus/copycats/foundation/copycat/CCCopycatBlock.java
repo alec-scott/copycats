@@ -8,11 +8,9 @@ import com.copycatsplus.copycats.utility.InteractionUtils;
 import com.zurrtum.create.content.contraptions.StructureTransform;
 import com.zurrtum.create.foundation.block.IBE;
 
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -37,7 +35,6 @@ import org.jetbrains.annotations.NotNull;
  * against {@link ICopycatBlock} instead.
  */
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public abstract class CCCopycatBlock extends Block implements IBE<CCCopycatBlockEntity>, ICopycatBlock {
 
     public CCCopycatBlock(Properties pProperties) {
@@ -59,7 +56,7 @@ public abstract class CCCopycatBlock extends Block implements IBE<CCCopycatBlock
     }
 
     @Override
-    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+    public InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         return InteractionUtils.sequentialItem(
                 () -> ICopycatBlock.super.useItemOn(stack, state, level, pos, player, hand, hitResult),
                 () -> super.useItemOn(stack, state, level, pos, player, hand, hitResult)
@@ -70,11 +67,6 @@ public abstract class CCCopycatBlock extends Block implements IBE<CCCopycatBlock
     public void setPlacedBy(Level worldIn, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
         super.setPlacedBy(worldIn, pos, state, placer, stack);
         ICopycatBlock.super.setPlacedBy(worldIn, pos, state, placer, stack);
-    }
-
-    @Override
-    public void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
-        ICopycatBlock.super.onRemove(pState, pLevel, pPos, pNewState, pIsMoving, super::onRemove);
     }
 
     @Override

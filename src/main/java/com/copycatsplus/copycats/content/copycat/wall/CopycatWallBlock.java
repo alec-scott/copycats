@@ -7,18 +7,16 @@ import com.copycatsplus.copycats.foundation.copycat.IStateType;
 import com.copycatsplus.copycats.utility.InteractionUtils;
 import com.zurrtum.create.foundation.block.IBE;
 import com.zurrtum.create.catnip.data.Iterate;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.BlockAndLightGetter;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
@@ -39,7 +37,6 @@ import static net.minecraft.core.Direction.Axis;
 
 @SuppressWarnings("deprecation")
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class CopycatWallBlock extends WallBlock implements ICopycatBlock, IBE<CCCopycatBlockEntity>, IStateType {
 
     public CopycatWallBlock(Properties properties) {
@@ -65,7 +62,7 @@ public class CopycatWallBlock extends WallBlock implements ICopycatBlock, IBE<CC
     }
 
     @Override
-    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+    public InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         return InteractionUtils.sequentialItem(
                 () -> ICopycatBlock.super.useItemOn(stack, state, level, pos, player, hand, hitResult),
                 () -> super.useItemOn(stack, state, level, pos, player, hand, hitResult)
@@ -81,11 +78,6 @@ public class CopycatWallBlock extends WallBlock implements ICopycatBlock, IBE<CC
     public void setPlacedBy(Level pLevel, BlockPos pPos, BlockState pState, @Nullable LivingEntity pPlacer, ItemStack pStack) {
         ICopycatBlock.super.setPlacedBy(pLevel, pPos, pState, pPlacer, pStack);
         super.setPlacedBy(pLevel, pPos, pState, pPlacer, pStack);
-    }
-
-    @Override
-    public void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
-        ICopycatBlock.super.onRemove(pState, pLevel, pPos, pNewState, pIsMoving, super::onRemove);
     }
 
     @Override
@@ -106,7 +98,7 @@ public class CopycatWallBlock extends WallBlock implements ICopycatBlock, IBE<CC
     }
 
     @Override
-    public boolean isIgnoredConnectivitySide(BlockAndTintGetter reader, BlockState state, Direction face, BlockPos fromPos, @Nullable BlockPos toPos, @Nullable BlockState toState) {
+    public boolean isIgnoredConnectivitySide(BlockAndLightGetter reader, BlockState state, Direction face, BlockPos fromPos, @Nullable BlockPos toPos, @Nullable BlockState toState) {
         if (toPos == null)
             return true;
 
@@ -128,7 +120,7 @@ public class CopycatWallBlock extends WallBlock implements ICopycatBlock, IBE<CC
     }
 
     @Override
-    public boolean canConnectTexturesToward(BlockAndTintGetter reader, BlockPos fromPos, BlockPos toPos, BlockState state) {
+    public boolean canConnectTexturesToward(BlockAndLightGetter reader, BlockPos fromPos, BlockPos toPos, BlockState state) {
         if (isPole(state)) return ICopycatBlock.super.canConnectTexturesToward(reader, fromPos, toPos, state);
 
         BlockState toState = reader.getBlockState(toPos);
@@ -137,7 +129,7 @@ public class CopycatWallBlock extends WallBlock implements ICopycatBlock, IBE<CC
         long sideCount = Arrays.stream(Iterate.horizontalDirections).filter(s -> state.getValue(byDirection(s)) != WallSide.NONE).count();
         if (sideCount > 2)
             return false;
-        if (sideCount == 2 && (state.getValue(NORTH_WALL) != state.getValue(SOUTH_WALL) || state.getValue(EAST_WALL) != state.getValue(WEST_WALL))) {
+        if (sideCount == 2 && (state.getValue(WallBlock.NORTH) != state.getValue(WallBlock.SOUTH) || state.getValue(WallBlock.EAST) != state.getValue(WallBlock.WEST))) {
             return false;
         }
 
@@ -145,7 +137,7 @@ public class CopycatWallBlock extends WallBlock implements ICopycatBlock, IBE<CC
         if (diff.equals(Vec3i.ZERO)) {
             return true;
         }
-        Direction face = Direction.fromDelta(diff.getX(), diff.getY(), diff.getZ());
+        Direction face = com.copycatsplus.copycats.utility.DirectionUtils.fromDelta(diff.getX(), diff.getY(), diff.getZ());
         if (face == null) {
             if (diff.distManhattan(Vec3i.ZERO) > 2) return false;
             if (diff.getY() == 0) return false;
@@ -205,10 +197,10 @@ public class CopycatWallBlock extends WallBlock implements ICopycatBlock, IBE<CC
 
     public static EnumProperty<WallSide> byDirection(Direction direction) {
         return switch (direction) {
-            case NORTH -> NORTH_WALL;
-            case SOUTH -> SOUTH_WALL;
-            case WEST -> WEST_WALL;
-            case EAST -> EAST_WALL;
+            case NORTH -> WallBlock.NORTH;
+            case SOUTH -> WallBlock.SOUTH;
+            case WEST -> WallBlock.WEST;
+            case EAST -> WallBlock.EAST;
             default -> throw new IllegalArgumentException("Vertical directions not supported");
         };
     }

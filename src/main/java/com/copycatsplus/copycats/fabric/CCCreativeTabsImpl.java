@@ -3,85 +3,54 @@ package com.copycatsplus.copycats.fabric;
 import com.copycatsplus.copycats.CCBlocks;
 import com.copycatsplus.copycats.CCCreativeTabs;
 import com.copycatsplus.copycats.Copycats;
-import com.copycatsplus.copycats.config.FeatureToggle;
-import com.zurrtum.create.Create;
-import com.copycatsplus.copycats.port.registrate.util.entry.ItemProviderEntry;
+import net.fabricmc.fabric.api.creativetab.v1.FabricCreativeModeTab;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.flag.FeatureElement;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.Set;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+// PORT-NOTE(26.1): Fabric tab registration. Tab order (was withTabsBefore Create's palettes tab) is Fabric's default.
+// The display generators skip disabled features, which also keeps them out of the search tab, so NeoForge's
+// search-tab cleanup isn't needed.
 public class CCCreativeTabsImpl extends CCCreativeTabs {
 
-    private static final DeferredRegister<CreativeModeTab> TAB_REGISTER =
-            DeferredRegister.create(Registries.CREATIVE_MODE_TAB, Copycats.MODID);
+    public static final ResourceKey<CreativeModeTab> MAIN_TAB_KEY = ResourceKey.create(Registries.CREATIVE_MODE_TAB, Copycats.asResource("main"));
+    public static final ResourceKey<CreativeModeTab> FUNCTIONAL_TAB_KEY = ResourceKey.create(Registries.CREATIVE_MODE_TAB, Copycats.asResource("functional"));
 
-    public static final Supplier<CreativeModeTab> MAIN_TAB = TAB_REGISTER.register("main", () -> CreativeModeTab.builder()
-                    .title(Component.translatable("itemGroup.copycats.main"))
-                    .withTabsBefore(Create.asResource("palettes"))
-                    .icon(CCBlocks.COPYCAT_SLAB::asStack)
-                    .displayItems(new AdvancedDisplayGenerator(DECORATIVE, CCCreativeTabsImpl.MAIN_TAB))
-                    .build());
-
-    public static final Supplier<CreativeModeTab> FUNCTIONAL_TAB = TAB_REGISTER.register("functional", () -> CreativeModeTab.builder()
-            .title(Component.translatable("itemGroup.copycats.functional"))
-            .withTabsBefore(Copycats.asResource("main"))
-            .icon(CCBlocks.COPYCAT_COGWHEEL::asStack)
-            .displayItems(new AdvancedDisplayGenerator(FUNCTIONAL, CCCreativeTabsImpl.FUNCTIONAL_TAB))
-            .build());
+    private static CreativeModeTab mainTab;
+    private static CreativeModeTab functionalTab;
 
     public static void setCreativeTab() {
-
     }
 
-    public static void register(IEventBus modEventBus) {
-        TAB_REGISTER.register(modEventBus);
-        modEventBus.addListener(CCCreativeTabsImpl::modifyTabEntries);
-    }
-
-    public static void modifyTabEntries(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTab().getType() == CreativeModeTab.Type.SEARCH) {
-            Set<Item> hiddenItems = Stream.concat(DECORATIVE.stream(), FUNCTIONAL.stream())
-                    .filter(x -> !FeatureToggle.isEnabled(x.getId()))
-                    .map(ItemProviderEntry::asItem)
-                    .collect(Collectors.toSet());
-            event.getSearchEntries().forEach(itemStack -> {
-                if (hiddenItems.contains(itemStack.getItem())) {
-                    if (event.getTab().contains(itemStack))
-                        event.remove(itemStack, CreativeModeTab.TabVisibility.SEARCH_TAB_ONLY);
-                }
-            });
-        }
+    public static void register() {
+        mainTab = Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, MAIN_TAB_KEY, FabricCreativeModeTab.builder()
+                .title(Component.translatable("itemGroup.copycats.main"))
+                .icon(CCBlocks.COPYCAT_SLAB::asStack)
+                .displayItems(new AdvancedDisplayGenerator(DECORATIVE, () -> mainTab))
+                .build());
+        functionalTab = Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, FUNCTIONAL_TAB_KEY, FabricCreativeModeTab.builder()
+                .title(Component.translatable("itemGroup.copycats.functional"))
+                .icon(CCBlocks.COPYCAT_COGWHEEL::asStack)
+                .displayItems(new AdvancedDisplayGenerator(FUNCTIONAL, () -> functionalTab))
+                .build());
     }
 
     public static CreativeModeTab getBaseTab() {
-        return MAIN_TAB.get();
+        return mainTab;
     }
 
     public static ResourceKey<CreativeModeTab> getBaseTabKey() {
-        return TAB_REGISTER.getRegistry().get().getResourceKey(MAIN_TAB.get()).get();
+        return MAIN_TAB_KEY;
     }
 
     public static CreativeModeTab getFunctionalTab() {
-        return FUNCTIONAL_TAB.get();
+        return functionalTab;
     }
 
     public static ResourceKey<CreativeModeTab> getFunctionalTabKey() {
-        return TAB_REGISTER.getRegistry().get().getResourceKey(FUNCTIONAL_TAB.get()).get();
+        return FUNCTIONAL_TAB_KEY;
     }
-
-
 }

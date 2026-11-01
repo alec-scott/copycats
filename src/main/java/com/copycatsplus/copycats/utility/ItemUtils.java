@@ -15,12 +15,4 @@ public class ItemUtils {
     public static ItemStack copyStackWithSize(ItemStack itemStack, int size) {
         return com.copycatsplus.copycats.utility.fabric.ItemUtilsImpl.copyStackWithSize(itemStack, size);
     }
-
-    /**
-     * Platform-independent implementation of serializing an ItemStack to NBT.
-     */
-    @NotNull
-    public static Tag serializeNBT(ItemStack stack, HolderLookup.Provider registries) {
-        return com.copycatsplus.copycats.utility.fabric.ItemUtilsImpl.serializeNBT(stack, registries);
-    }
 }

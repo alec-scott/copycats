@@ -31,7 +31,7 @@ public class BlockMixin {
                                              Operation<Boolean> original,
                                              @Local(argsOnly = true) BlockGetter level,
                                              @Local(argsOnly = true, ordinal = 1) BlockPos pos) {
-        if (AllBlocks.COPYCAT_BASE.has(instance)) {
+        if (instance.is(AllBlocks.COPYCAT_BASE)) {
             return false;
         }
         if (instance.getBlock() instanceof BracketBlock) {

@@ -40,30 +40,26 @@ public enum CCKeys {
     }
 
     public static boolean isKeyDown(int key) {
-        return InputConstants.isKeyDown(Minecraft.getInstance()
-                .getWindow()
-                .getWindow(), key);
+        return InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), key);
     }
 
     public static boolean isMouseButtonDown(int button) {
-        return GLFW.glfwGetMouseButton(Minecraft.getInstance()
-                .getWindow()
-                .getWindow(), button) == 1;
+        return GLFW.glfwGetMouseButton(Minecraft.getInstance().getWindow().handle(), button) == 1;
     }
 
     public static void register() {
     com.copycatsplus.copycats.fabric.CCKeysImpl.register();}
 
     public static boolean ctrlDown() {
-        return Screen.hasControlDown();
+        return Minecraft.getInstance().hasControlDown();
     }
 
     public static boolean shiftDown() {
-        return Screen.hasShiftDown();
+        return Minecraft.getInstance().hasShiftDown();
     }
 
     public static boolean altDown() {
-        return Screen.hasAltDown();
+        return Minecraft.getInstance().hasAltDown();
     }
 
 }

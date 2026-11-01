@@ -1,26 +1,14 @@
 package com.copycatsplus.copycats.utility.fabric;
 
-import com.copycatsplus.copycats.utility.BlockEntityUtils;
-import com.zurrtum.create.catnip.levelWrappers.SchematicLevel;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.neoforge.common.world.AuxiliaryLightManager;
 
 public class BlockEntityUtilsImpl {
     public static void requestModelDataUpdate(BlockEntity blockEntity) {
-        blockEntity.requestModelDataUpdate();
+        // no-op: Fabric models read the block entity at meshing time, and redraw() sends a block update
     }
 
     public static void updateLight(BlockEntity blockEntity) {
-        Level level = blockEntity.getLevel();
-        if (level instanceof SchematicLevel)
-            return;
-        if (level != null && level.getChunkSource() != null) { // should not be necessary to check chunk source for null but seems like it happens inconsistently with other mods installed
-            BlockPos pos = blockEntity.getBlockPos();
-            AuxiliaryLightManager lightManager = level.getAuxLightManager(pos);
-            if (lightManager != null)
-                lightManager.setLightAt(pos, BlockEntityUtils.getLightEmission(blockEntity));
-        }
+        // PORT-NOTE: NeoForge's AuxiliaryLightManager gave copycats their material's light level. Fabric has no
+        // per-position light emission, so (as with Create Fly's own copycats) glowing materials don't emit light.
     }
 }

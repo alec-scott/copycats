@@ -9,8 +9,4 @@ public class ItemUtilsImpl {
     public static ItemStack copyStackWithSize(ItemStack itemStack, int size) {
         return itemStack.copyWithCount(size);
     }
-
-    public static Tag serializeNBT(ItemStack stack, HolderLookup.Provider registries) {
-        return stack.saveOptional(registries);
-    }
 }

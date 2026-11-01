@@ -8,17 +8,15 @@ import com.copycatsplus.copycats.utility.BlockEntityUtils;
 import com.copycatsplus.copycats.utility.InteractionUtils;
 import com.zurrtum.create.AllBlocks;
 import com.zurrtum.create.content.decoration.slidingDoor.SlidingDoorBlock;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.BlockAndLightGetter;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -38,7 +36,6 @@ import org.jetbrains.annotations.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class CopycatSlidingDoorBlock extends SlidingDoorBlock implements ICopycatBlock {
 
     public static BooleanProperty CT = CopycatDoorBlock.CT;
@@ -82,7 +79,7 @@ public class CopycatSlidingDoorBlock extends SlidingDoorBlock implements ICopyca
     }
 
     @Override
-    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+    public InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         return InteractionUtils.sequentialItem(
                 () -> ICopycatBlock.super.useItemOn(stack, state, level, pos, player, hand, hitResult),
                 () -> super.useItemOn(stack, state, level, pos, player, hand, hitResult)
@@ -117,11 +114,6 @@ public class CopycatSlidingDoorBlock extends SlidingDoorBlock implements ICopyca
     }
 
     @Override
-    public void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
-        ICopycatBlock.super.onRemove(pState, pLevel, pPos, pNewState, pIsMoving, super::onRemove);
-    }
-
-    @Override
     public BlockState playerWillDestroy(@NotNull Level level, @NotNull BlockPos pos, @NotNull BlockState state, @NotNull Player player) {
         super.playerWillDestroy(level, pos, state, player);
         ICopycatBlock.super.playerWillDestroy(level, pos, state, player);
@@ -129,12 +121,12 @@ public class CopycatSlidingDoorBlock extends SlidingDoorBlock implements ICopyca
     }
 
     @Override
-    public boolean isIgnoredConnectivitySide(BlockAndTintGetter reader, BlockState state, Direction face, BlockPos fromPos, @Nullable BlockPos toPos, @Nullable BlockState toState) {
+    public boolean isIgnoredConnectivitySide(BlockAndLightGetter reader, BlockState state, Direction face, BlockPos fromPos, @Nullable BlockPos toPos, @Nullable BlockState toState) {
         return true;
     }
 
     @Override
-    public boolean canConnectTexturesToward(BlockAndTintGetter reader, BlockPos fromPos, BlockPos toPos, BlockState state) {
+    public boolean canConnectTexturesToward(BlockAndLightGetter reader, BlockPos fromPos, BlockPos toPos, BlockState state) {
         return false;
     }
 
@@ -165,7 +157,7 @@ public class CopycatSlidingDoorBlock extends SlidingDoorBlock implements ICopyca
         BlockState neighborMaterial = neighborState.getBlock() instanceof ICopycatBlock
                 ? ICopycatBlock.getMaterial(level, toPos)
                 : neighborState;
-        if (AllBlocks.COPYCAT_BASE.has(neighborMaterial) && AllBlocks.COPYCAT_BASE.has(material)) {
+        if (neighborMaterial.is(AllBlocks.COPYCAT_BASE) && material.is(AllBlocks.COPYCAT_BASE)) {
             if (dir == Direction.UP && toState.is(this) && toState.getValue(HALF) == DoubleBlockHalf.UPPER) {
                 return true;
             }

@@ -11,14 +11,14 @@ import com.zurrtum.create.content.redstone.RoseQuartzLampBlock;
 import com.zurrtum.create.content.schematics.requirement.ItemRequirement;
 import com.zurrtum.create.foundation.blockEntity.IMergeableBE;
 import com.zurrtum.create.catnip.data.Iterate;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentPatch;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import java.util.Optional;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -27,7 +27,6 @@ import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.ApiStatus;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -48,7 +47,6 @@ import javax.annotation.ParametersAreNonnullByDefault;
  * the implementation of copycats.
  */
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public interface ICopycatBlockEntity extends SpecialBlockEntityItemRequirement, TransformableBlockEntity, PartialSafeNBT, IMergeableBE {
 
     void notifyUpdate();
@@ -84,13 +82,9 @@ public interface ICopycatBlockEntity extends SpecialBlockEntityItemRequirement, 
      * Implementors should call this method in their constructor.
      */
     default void init() {
-        setMaterialInternal(AllBlocks.COPYCAT_BASE.getDefaultState());
+        setMaterialInternal(AllBlocks.COPYCAT_BASE.defaultBlockState());
         setConsumedItemInternal(ItemStack.EMPTY);
         setCTEnabledInternal(true);
-    }
-
-    default void onLoad() {
-        BlockEntityUtils.updateLight((BlockEntity) this);
     }
 
     default ICopycatBlock getBlock() {
@@ -104,7 +98,7 @@ public interface ICopycatBlockEntity extends SpecialBlockEntityItemRequirement, 
     }
 
     default boolean hasCustomMaterial() {
-        return !AllBlocks.COPYCAT_BASE.has(getMaterial());
+        return !getMaterial().is(AllBlocks.COPYCAT_BASE);
     }
 
     default void setMaterial(BlockState blockState) {
@@ -188,21 +182,28 @@ public interface ICopycatBlockEntity extends SpecialBlockEntityItemRequirement, 
         notifyUpdate();
     }
 
-    static void read(ICopycatBlockEntity self, CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
-        if (tag.contains("EnableCT")) // need to check because copycats migrated from C:Connected don't have this tag
-            self.setCTEnabled(tag.getBoolean("EnableCT"));
-        else
-            self.setCTEnabled(true);
+    /**
+     * Drop the consumed item when the block entity is removed (call from preRemoveSideEffects).
+     */
+    static void dropConsumedItems(ICopycatBlockEntity self, BlockPos pos) {
+        if (self.getLevel() != null)
+            net.minecraft.world.level.block.Block.popResource(self.getLevel(), pos, self.getConsumedItem());
+    }
 
-        self.setConsumedItem(ItemStack.parseOptional(registries, (tag.getCompound("Item"))));
+    static void read(ICopycatBlockEntity self, ValueInput view, boolean clientPacket) {
+        // EnableCT may be missing on copycats migrated from C:Connected
+        self.setCTEnabled(view.getBooleanOr("EnableCT", true));
+
+        self.setConsumedItem(view.read("Item", ItemStack.CODEC).orElse(ItemStack.EMPTY));
 
         BlockState prevMaterial = self.getMaterial();
-        if (!tag.contains("Material")) {
+        Optional<BlockState> material = view.read("Material", BlockState.CODEC);
+        if (material.isEmpty()) {
             self.setConsumedItem(ItemStack.EMPTY);
             return;
         }
 
-        self.setMaterialInternal(NbtUtils.readBlockState(self.blockHolderGetter(), tag.getCompound("Material")));
+        self.setMaterialInternal(material.get());
 
         // Validate Material
         if (self.getMaterial() != null && !clientPacket) {
@@ -215,28 +216,29 @@ public interface ICopycatBlockEntity extends SpecialBlockEntityItemRequirement, 
             if (acceptedBlockState != null && self.getMaterial().is(acceptedBlockState.getBlock()))
                 return;
             self.setConsumedItem(ItemStack.EMPTY);
-            self.setMaterialInternal(AllBlocks.COPYCAT_BASE.getDefaultState());
+            self.setMaterialInternal(AllBlocks.COPYCAT_BASE.defaultBlockState());
         }
 
         if (prevMaterial != self.getMaterial())
             BlockEntityUtils.redraw((BlockEntity) self); // not calling self.redraw() because Extended Cogwheels overwrites it to be protected
     }
 
-    static void writeSafe(ICopycatBlockEntity self, CompoundTag tag, HolderLookup.Provider registries) {
-        ItemStack stackWithoutNBT = self.getConsumedItem().copy();
-        ItemStack stackWithoutComponents = new ItemStack(stackWithoutNBT.getItemHolder(), stackWithoutNBT.getCount(), DataComponentPatch.EMPTY);
-        BlockEntityUtils.saveMetadata((BlockEntity) self, tag);
-        write(tag, stackWithoutComponents, self.getMaterial(), registries, self.isCTEnabled());
+    static void writeSafe(ICopycatBlockEntity self, ValueOutput view) {
+        ItemStack consumed = self.getConsumedItem();
+        ItemStack stackWithoutComponents = new ItemStack(consumed.typeHolder(), consumed.getCount(), DataComponentPatch.EMPTY);
+        BlockEntityUtils.saveMetadata((BlockEntity) self, view);
+        write(view, stackWithoutComponents, self.getMaterial(), self.isCTEnabled());
     }
 
-    static void write(ICopycatBlockEntity self, CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
-        write(tag, self.getConsumedItem(), self.getMaterial(), registries, self.isCTEnabled());
+    static void write(ICopycatBlockEntity self, ValueOutput view, boolean clientPacket) {
+        write(view, self.getConsumedItem(), self.getMaterial(), self.isCTEnabled());
     }
 
     @ApiStatus.Internal
-    static void write(CompoundTag tag, ItemStack stack, BlockState material, HolderLookup.Provider registries, boolean enableCT) {
-        tag.put("Item", ItemUtils.serializeNBT(stack, registries));
-        tag.put("Material", NbtUtils.writeBlockState(material));
-        tag.putBoolean("EnableCT", enableCT);
+    static void write(ValueOutput view, ItemStack stack, BlockState material, boolean enableCT) {
+        if (!stack.isEmpty())
+            view.store("Item", ItemStack.CODEC, stack);
+        view.store("Material", BlockState.CODEC, material);
+        view.putBoolean("EnableCT", enableCT);
     }
 }

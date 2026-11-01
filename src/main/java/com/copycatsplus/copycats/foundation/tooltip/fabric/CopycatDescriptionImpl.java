@@ -2,20 +2,22 @@ package com.copycatsplus.copycats.foundation.tooltip.fabric;
 
 import com.copycatsplus.copycats.foundation.tooltip.CopycatDescription;
 import com.zurrtum.create.client.foundation.item.TooltipModifier;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
-import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import org.jetbrains.annotations.NotNull;
 
-public class CopycatDescriptionImpl extends CopycatDescription implements TooltipModifier {
+import java.util.List;
 
+public class CopycatDescriptionImpl extends CopycatDescription implements TooltipModifier {
     protected CopycatDescriptionImpl(Item item) {
         super(item);
     }
 
     @Override
-    public void modify(ItemTooltipEvent context) {
-        super.modify(context.getItemStack().getItem(), context.getToolTip());
+    public void modify(List<Component> tooltip, Player player) {
+        super.modify(item, tooltip);
     }
 
     @NotNull

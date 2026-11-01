@@ -1,16 +1,19 @@
 package com.copycatsplus.copycats.foundation.copycat.multistate;
 
+import net.minecraft.world.level.storage.ValueOutput;
+
+import net.minecraft.world.level.storage.ValueInput;
+
 import com.copycatsplus.copycats.Copycats;
 import com.copycatsplus.copycats.foundation.copycat.ICopycatBlockEntity;
 import com.copycatsplus.copycats.utility.BlockEntityUtils;
 import com.zurrtum.create.content.schematics.requirement.ItemRequirement;
 import com.zurrtum.create.foundation.blockEntity.SmartBlockEntity;
 import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -27,7 +30,6 @@ import java.util.List;
  * against {@link IMultiStateCopycatBlockEntity} instead.
  */
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class MultiStateCopycatBlockEntity extends SmartBlockEntity implements IMultiStateCopycatBlockEntity {
 
     private MaterialItemStorage materialItemStorage;
@@ -47,19 +49,13 @@ public class MultiStateCopycatBlockEntity extends SmartBlockEntity implements IM
     }
 
     @Override
-    public void onLoad() {
-        super.onLoad();
-        IMultiStateCopycatBlockEntity.super.onLoad();
-    }
-
-    @Override
     public void invalidate() {
         super.invalidate();
         getMaterialItemStorage().clear();
     }
 
     @Override
-    public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
+    public void addBehaviours(List<BlockEntityBehaviour<?>> behaviours) {
     }
 
     @Override
@@ -68,26 +64,26 @@ public class MultiStateCopycatBlockEntity extends SmartBlockEntity implements IM
     }
 
     @Override
-    public void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
-        super.read(tag, registries, clientPacket);
-        IMultiStateCopycatBlockEntity.read(this, tag, registries, clientPacket);
+    public void read(ValueInput tag, boolean clientPacket) {
+        super.read(tag, clientPacket);
+        IMultiStateCopycatBlockEntity.read(this, tag, clientPacket);
     }
 
     @Override
-    public void writeSafe(CompoundTag tag, HolderLookup.Provider registries) {
-        super.writeSafe(tag, registries);
-        IMultiStateCopycatBlockEntity.writeSafe(this, tag, registries);
+    public void writeSafe(ValueOutput tag) {
+        super.writeSafe(tag);
+        IMultiStateCopycatBlockEntity.writeSafe(this, tag);
     }
 
     @Override
-    public void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
-        super.write(tag, registries, clientPacket);
-        IMultiStateCopycatBlockEntity.write(this, tag, registries, clientPacket);
+    public void write(ValueOutput tag, boolean clientPacket) {
+        super.write(tag, clientPacket);
+        IMultiStateCopycatBlockEntity.write(this, tag, clientPacket);
     }
 
     public void migrateData(ICopycatBlockEntity copycatBlockEntity) {
         if (getBlockState().getBlock() instanceof MultiStateCopycatBlock mscb) {
-            ResourceLocation blockId = copycatBlockEntity.getBlockState().getBlock().builtInRegistryHolder().key().location();
+            Identifier blockId = copycatBlockEntity.getBlockState().getBlock().builtInRegistryHolder().key().identifier();
             Copycats.LOGGER.debug("Converting block({}) at @{} to a multistate copycat", blockId.toString(), copycatBlockEntity.getBlockPos().toShortString());
             //Set the first property available to have the item and mat.
             String firstProperty = getMaterialItemStorage().getAllProperties().stream()
@@ -115,5 +111,11 @@ public class MultiStateCopycatBlockEntity extends SmartBlockEntity implements IM
             }
             BlockEntityUtils.redraw(this);
         }
+    }
+
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState oldState) {
+        super.preRemoveSideEffects(pos, oldState);
+        IMultiStateCopycatBlockEntity.dropConsumedItems(this, pos);
     }
 }

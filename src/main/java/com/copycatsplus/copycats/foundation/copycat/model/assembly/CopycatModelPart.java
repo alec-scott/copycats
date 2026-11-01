@@ -7,7 +7,7 @@ import net.minecraft.world.level.block.state.BlockState;
 /**
  * Assemble quads for a given model using the provided API in {@link CopycatRenderContext}.
  * <p>
- * The provided model can be a simple model of the copied material or any {@link net.minecraft.client.resources.model.BakedModel}
+ * The provided model can be a simple model of the copied material or any {@link net.minecraft.client.resources.model.BlockStateModel}
  * returned by a {@link CopycatModelCore.ModelGetter}.
  * <p>
  * To maintain platform-independence, the model quads are not directly accessible, and implementors must only use the API

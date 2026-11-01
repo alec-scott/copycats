@@ -13,7 +13,7 @@ import com.copycatsplus.copycats.port.registrate.util.entry.ItemProviderEntry;
 import com.copycatsplus.copycats.port.registrate.util.entry.RegistryEntry;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -240,7 +240,7 @@ public class CCStandardRecipes extends CopycatsRecipeProvider {
         return com.copycatsplus.copycats.datagen.recipes.fabric.CCStandardRecipesImpl.create(result);
     }
 
-    static GeneratedRecipeBuilder create(ResourceLocation result) {
+    static GeneratedRecipeBuilder create(Identifier result) {
         return com.copycatsplus.copycats.datagen.recipes.fabric.CCStandardRecipesImpl.create(result);
     }
 
@@ -307,7 +307,7 @@ public class CCStandardRecipes extends CopycatsRecipeProvider {
     public CCStandardRecipes(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
         super(output, registries);
 
-        List<ResourceLocation> missingRecipes = new LinkedList<>();
+        List<Identifier> missingRecipes = new LinkedList<>();
         for (RegistryEntry<? extends Block,?> entry : CCBlocks.getAllRegisteredBlocksWithoutWrapped()) {
             if (!blocksWithoutRecipe.contains(entry)) {
                 if (!copycatsWithRecipes.contains(entry.get()))
@@ -315,7 +315,7 @@ public class CCStandardRecipes extends CopycatsRecipeProvider {
             }
         }
         if (!missingRecipes.isEmpty()) {
-            throw new AssertionError("The following copycats do not have a crafting recipe: \n" + missingRecipes.stream().map(ResourceLocation::toString).collect(Collectors.joining(", ")));
+            throw new AssertionError("The following copycats do not have a crafting recipe: \n" + missingRecipes.stream().map(Identifier::toString).collect(Collectors.joining(", ")));
         }
     }
 

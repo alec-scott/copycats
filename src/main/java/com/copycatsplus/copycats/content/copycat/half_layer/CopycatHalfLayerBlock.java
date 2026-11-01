@@ -17,7 +17,6 @@ import com.zurrtum.create.api.schematic.requirement.SpecialBlockItemRequirement;
 import com.zurrtum.create.content.contraptions.StructureTransform;
 import com.zurrtum.create.content.equipment.wrench.IWrenchable;
 import com.zurrtum.create.content.schematics.requirement.ItemRequirement;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
@@ -51,7 +50,6 @@ import java.util.*;
 import static net.minecraft.core.Direction.Axis;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class CopycatHalfLayerBlock extends WaterloggedMultiStateCopycatBlock implements SpecialBlockItemRequirement {
 
 
@@ -59,7 +57,7 @@ public class CopycatHalfLayerBlock extends WaterloggedMultiStateCopycatBlock imp
     public static final EnumProperty<Half> HALF = BlockStateProperties.HALF;
     public static final IntegerProperty POSITIVE_LAYERS = IntegerProperty.create("positive_layers", 0, 8);
     public static final IntegerProperty NEGATIVE_LAYERS = IntegerProperty.create("negative_layers", 0, 8);
-    private final ImmutableMap<BlockState, VoxelShape> shapesCache;
+    private final java.util.function.Function<BlockState, VoxelShape> shapesCache;
     private final ImmutableMap<FaceData, VoxelShape> partialFaceCache;
 
     private static record FaceData(String property, Axis axis, Half half, int layers, Direction face) {
@@ -149,7 +147,7 @@ public class CopycatHalfLayerBlock extends WaterloggedMultiStateCopycatBlock imp
         BlockState state = context.getLevel().getBlockState(blockPos);
         if (state.is(this)) {
             Vec3 clickPosition = context.getClickLocation()
-                    .add(Vec3.atLowerCornerOf(context.getClickedFace().getNormal()).scale(1 / 16f))
+                    .add(Vec3.atLowerCornerOf(context.getClickedFace().getUnitVec3i()).scale(1 / 16f))
                     .subtract(Vec3.atLowerCornerOf(context.getClickedPos()));
             IntegerProperty targetProp;
             if (state.getValue(AXIS).choose(clickPosition.x, clickPosition.y, clickPosition.z) < 0.5f) {
@@ -184,7 +182,7 @@ public class CopycatHalfLayerBlock extends WaterloggedMultiStateCopycatBlock imp
             return false;
         }
         Vec3 clickPosition = pUseContext.getClickLocation()
-                .add(Vec3.atLowerCornerOf(pUseContext.getClickedFace().getNormal()).scale(1 / 16f))
+                .add(Vec3.atLowerCornerOf(pUseContext.getClickedFace().getUnitVec3i()).scale(1 / 16f))
                 .subtract(Vec3.atLowerCornerOf(pUseContext.getClickedPos()));
         IntegerProperty targetProp;
         if (pState.getValue(AXIS).choose(clickPosition.x, clickPosition.y, clickPosition.z) < 0.5f) {
@@ -205,7 +203,7 @@ public class CopycatHalfLayerBlock extends WaterloggedMultiStateCopycatBlock imp
         BlockPos pos = context.getClickedPos();
         Player player = context.getPlayer();
         Vec3 clickPosition = context.getClickLocation()
-                .subtract(Vec3.atLowerCornerOf(context.getClickedFace().getNormal()).scale(1 / 16f))
+                .subtract(Vec3.atLowerCornerOf(context.getClickedFace().getUnitVec3i()).scale(1 / 16f))
                 .subtract(Vec3.atLowerCornerOf(pos));
         IntegerProperty targetProp;
         if (state.getValue(AXIS).choose(clickPosition.x, clickPosition.y, clickPosition.z) < 0.5f) {
@@ -228,7 +226,7 @@ public class CopycatHalfLayerBlock extends WaterloggedMultiStateCopycatBlock imp
             }
             BlockPos up = pos.relative(Direction.UP);
             // need to call updateShape before setBlock to schedule a tick for water
-            world.setBlockAndUpdate(pos, state.setValue(targetProp, state.getValue(targetProp) - 1).updateShape(Direction.UP, world.getBlockState(up), world, pos, up));
+            world.setBlockAndUpdate(pos, state.setValue(targetProp, state.getValue(targetProp) - 1).updateShape(world, world, pos, Direction.UP, up, world.getBlockState(up), world.getRandom()));
             IWrenchable.playRemoveSound(world, pos);
         }
         return InteractionResult.SUCCESS;
@@ -380,7 +378,7 @@ public class CopycatHalfLayerBlock extends WaterloggedMultiStateCopycatBlock imp
     @SuppressWarnings("deprecation")
     @Override
     public @NotNull VoxelShape getShape(@NotNull BlockState pState, @NotNull BlockGetter pLevel, @NotNull BlockPos pPos, @NotNull CollisionContext pContext) {
-        return Objects.requireNonNull(this.shapesCache.get(pState));
+        return Objects.requireNonNull(this.shapesCache.apply(pState));
     }
 
     @Override

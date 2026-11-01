@@ -13,10 +13,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.BlockAndLightGetter;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Mirror;
@@ -40,7 +39,7 @@ public abstract class CopycatStepBlockMixin extends WaterloggedCopycatBlock impl
     }
 
     @Override
-    public BlockState getAppearance(BlockState state, BlockAndTintGetter level, BlockPos pos, Direction side, @Nullable BlockState queryState, @Nullable BlockPos queryPos) {
+    public BlockState getAppearance(BlockState state, BlockAndLightGetter level, BlockPos pos, Direction side, @Nullable BlockState queryState, @Nullable BlockPos queryPos) {
         if (!this.isCTEnabled(state, level, queryPos))
             return state;
         return super.getAppearance(state, level, pos, side, queryState, queryPos);
@@ -53,7 +52,7 @@ public abstract class CopycatStepBlockMixin extends WaterloggedCopycatBlock impl
 
     @Override
     @Unique
-    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+    public InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         return super.useItemOn(stack, state, level, pos, player, hand, hitResult);
     }
 
@@ -80,7 +79,7 @@ public abstract class CopycatStepBlockMixin extends WaterloggedCopycatBlock impl
     }
 
     @Override
-    public boolean isIgnoredConnectivitySide(BlockAndTintGetter reader, BlockState state, Direction face, BlockPos fromPos, @Nullable BlockPos toPos) {
+    public boolean isIgnoredConnectivitySide(BlockAndLightGetter reader, BlockState state, Direction face, BlockPos fromPos, @Nullable BlockPos toPos) {
         if (CopycatExternalContext.isForBlockingLogic()) {
             return false;
         }
@@ -92,7 +91,7 @@ public abstract class CopycatStepBlockMixin extends WaterloggedCopycatBlock impl
     }
 
     @Override
-    public boolean canConnectTexturesToward(BlockAndTintGetter reader, BlockPos fromPos, BlockPos toPos, BlockState fromState) {
+    public boolean canConnectTexturesToward(BlockAndLightGetter reader, BlockPos fromPos, BlockPos toPos, BlockState fromState) {
         BlockState toState = reader.getBlockState(toPos);
 
         if (toState.getBlock() instanceof ICopycatBlock) {

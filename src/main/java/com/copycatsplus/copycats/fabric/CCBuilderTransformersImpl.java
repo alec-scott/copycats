@@ -1,7 +1,6 @@
 package com.copycatsplus.copycats.fabric;
 
-import com.copycatsplus.copycats.foundation.copycat.ICopycatBlock;
-import com.copycatsplus.copycats.foundation.copycat.multistate.IMultiStateCopycatBlock;
+import com.copycatsplus.copycats.foundation.copycat.client.CopycatTints;
 import com.copycatsplus.copycats.port.create.foundation.data.SharedProperties;
 import com.copycatsplus.copycats.port.create.foundation.data.TagGen;
 import com.copycatsplus.copycats.port.registrate.builders.BlockBuilder;
@@ -16,7 +15,7 @@ public class CCBuilderTransformersImpl {
         return b -> b.initialProperties(SharedProperties::softMetal)
                 .initialProperties(SharedProperties::softMetal)
                 .properties(p -> p.noOcclusion().mapColor(MapColor.METAL).forceSolidOn())
-                .color(() -> ICopycatBlock::wrappedColor)
+                .color(() -> CopycatTints::simple)
                 .transform(TagGen.axeOrPickaxe());
     }
 
@@ -24,7 +23,7 @@ public class CCBuilderTransformersImpl {
         return b -> b.initialProperties(SharedProperties::softMetal)
                 .initialProperties(SharedProperties::softMetal)
                 .properties(p -> p.noOcclusion().mapColor(MapColor.METAL).forceSolidOn())
-                .color(() -> IMultiStateCopycatBlock::wrappedColor)
+                .color(() -> CopycatTints::multiState)
                 .transform(TagGen.axeOrPickaxe());
     }
 }

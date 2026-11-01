@@ -1,7 +1,12 @@
 package com.copycatsplus.copycats.foundation.copycat.multistate;
 
+import net.minecraft.world.level.ScheduledTickAccess;
+
+import net.minecraft.world.level.LevelReader;
+
+import net.minecraft.util.RandomSource;
+
 import com.zurrtum.create.foundation.block.ProperWaterloggedBlock;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -19,7 +24,6 @@ import javax.annotation.ParametersAreNonnullByDefault;
  * another base class and can be waterlogged.
  */
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public abstract class WaterloggedMultiStateCopycatBlock extends MultiStateCopycatBlock implements ProperWaterloggedBlock {
     public WaterloggedMultiStateCopycatBlock(Properties properties) {
         super(properties);
@@ -42,14 +46,9 @@ public abstract class WaterloggedMultiStateCopycatBlock extends MultiStateCopyca
     }
 
     @Override
-    public @NotNull BlockState updateShape(@NotNull BlockState pState,
-                                           @NotNull Direction pDirection,
-                                           @NotNull BlockState pNeighborState,
-                                           @NotNull LevelAccessor pLevel,
-                                           @NotNull BlockPos pCurrentPos,
-                                           @NotNull BlockPos pNeighborPos) {
-        super.updateShape(pState, pDirection, pNeighborState, pLevel, pCurrentPos, pNeighborPos);
-        updateWater(pLevel, pState, pCurrentPos);
+    public @NotNull BlockState updateShape(BlockState pState, LevelReader pLevel, ScheduledTickAccess ticks, BlockPos pCurrentPos, Direction pDirection, BlockPos pNeighborPos, BlockState pNeighborState, RandomSource random) {
+        super.updateShape(pState, pLevel, ticks, pCurrentPos, pDirection, pNeighborPos, pNeighborState, random);
+        updateWater(pLevel, ticks, pState, pCurrentPos);
         return pState;
     }
 }

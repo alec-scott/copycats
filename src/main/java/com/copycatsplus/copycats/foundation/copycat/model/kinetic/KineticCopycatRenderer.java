@@ -5,8 +5,8 @@ import com.copycatsplus.copycats.foundation.copycat.ICopycatBlockEntity;
 import com.copycatsplus.copycats.foundation.copycat.multistate.IMultiStateCopycatBlockEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.zurrtum.create.client.flywheel.api.model.Model;
-import net.createmod.catnip.render.*;
-import net.minecraft.client.resources.model.BakedModel;
+import com.zurrtum.create.client.catnip.render.*;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 
 /**
  * Helper class to render kinetic copycat models.
@@ -43,11 +43,11 @@ public class KineticCopycatRenderer {
         );
     }
 
-    public static SuperByteBuffer renderBuffer(BakedModel model, ICopycatBlockEntity be, PoseStack ms) {
+    public static SuperByteBuffer renderBuffer(BlockStateModel model, ICopycatBlockEntity be, PoseStack ms) {
         return com.copycatsplus.copycats.foundation.copycat.model.kinetic.fabric.KineticCopycatRendererImpl.renderBuffer(model, be, ms);
     }
 
-    public static Model instancedModel(BakedModel model, ICopycatBlockEntity be) {
+    public static Model instancedModel(BlockStateModel model, ICopycatBlockEntity be) {
         return com.copycatsplus.copycats.foundation.copycat.model.kinetic.fabric.KineticCopycatRendererImpl.instancedModel(model, be);
     }
 }

@@ -1,5 +1,9 @@
 package com.copycatsplus.copycats.content.copycat.fluid_pipe;
 
+import net.minecraft.world.level.storage.ValueOutput;
+
+import net.minecraft.world.level.storage.ValueInput;
+
 import com.copycatsplus.copycats.foundation.copycat.ICopycatBlockEntity;
 import com.copycatsplus.copycats.foundation.copycat.multistate.IMultiStateCopycatBlockEntity;
 import com.zurrtum.create.content.contraptions.StructureTransform;
@@ -56,12 +60,6 @@ public class CopycatFluidPipeBlockEntity extends FluidPipeBlockEntity implements
     }
 
     @Override
-    public void onLoad() {
-        super.onLoad();
-        ICopycatBlockEntity.super.onLoad();
-    }
-
-    @Override
     public ItemRequirement getRequiredItems(BlockState state) {
         return ICopycatBlockEntity.super.getRequiredItems(state).union(super.getRequiredItems(state));
     }
@@ -73,21 +71,26 @@ public class CopycatFluidPipeBlockEntity extends FluidPipeBlockEntity implements
     }
 
     @Override
-    public void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
-        super.read(tag, registries, clientPacket);
-        ICopycatBlockEntity.read(this, tag, registries, clientPacket);
+    public void read(ValueInput tag, boolean clientPacket) {
+        super.read(tag, clientPacket);
+        ICopycatBlockEntity.read(this, tag, clientPacket);
     }
 
     @Override
-    public void writeSafe(CompoundTag tag, HolderLookup.Provider registries) {
-        super.writeSafe(tag, registries);
-        ICopycatBlockEntity.writeSafe(this, tag, registries);
+    public void writeSafe(ValueOutput tag) {
+        super.writeSafe(tag);
+        ICopycatBlockEntity.writeSafe(this, tag);
     }
 
     @Override
-    public void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
-        super.write(tag, registries, clientPacket);
-        ICopycatBlockEntity.write(this, tag, registries, clientPacket);
+    public void write(ValueOutput tag, boolean clientPacket) {
+        super.write(tag, clientPacket);
+        ICopycatBlockEntity.write(this, tag, clientPacket);
+    }
+
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState oldState) {
+        super.preRemoveSideEffects(pos, oldState);
+        ICopycatBlockEntity.dropConsumedItems(this, pos);
     }
 }
-

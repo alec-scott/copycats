@@ -1,15 +1,9 @@
 package com.copycatsplus.copycats.compat.fabric;
 
-import net.neoforged.fml.ModList;
-import net.neoforged.fml.loading.FMLLoader;
+import net.fabricmc.loader.api.FabricLoader;
 
 public class ModsImpl {
-
-
     public static boolean getLoaded(String id) {
-        // If ModList is null, we are in the loading stage, so we need to check the loading mod list
-        if (ModList.get() == null)
-            return FMLLoader.getLoadingModList().getMods().stream().anyMatch(mod -> mod.getModId().equals(id));
-        return ModList.get().isLoaded(id);
+        return FabricLoader.getInstance().isModLoaded(id);
     }
 }

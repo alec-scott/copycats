@@ -1,44 +1,39 @@
 package com.copycatsplus.copycats.config.fabric;
 
 import com.copycatsplus.copycats.Copycats;
-import com.copycatsplus.copycats.config.*;
+import com.copycatsplus.copycats.config.CClient;
+import com.copycatsplus.copycats.config.CCConfigs;
+import com.copycatsplus.copycats.config.CCommon;
+import com.copycatsplus.copycats.config.CServer;
 import com.copycatsplus.copycats.port.catnip.config.ConfigBase;
-import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.ModLoadingContext;
-import net.neoforged.fml.common.EventBusSubscriber;
+import fuzs.forgeconfigapiport.fabric.api.v5.ConfigRegistry;
+import fuzs.forgeconfigapiport.fabric.api.v5.ModConfigEvents;
 import net.neoforged.fml.config.ModConfig;
-import net.neoforged.fml.event.config.ModConfigEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 import java.util.Map;
 
-@EventBusSubscriber(modid = Copycats.MODID, bus = EventBusSubscriber.Bus.MOD)
 public class CCConfigsImpl extends CCConfigs {
 
-    @SubscribeEvent
-    public static void onLoad(ModConfigEvent.Loading event) {
+    public static void onLoad(ModConfig modConfig) {
         for (ConfigBase config : CONFIGS.values())
-            if (config.specification == event.getConfig()
-                    .getSpec())
+            if (config.specification == modConfig.getSpec())
                 config.onLoad();
     }
 
-    @SubscribeEvent
-    public static void onReload(ModConfigEvent.Reloading event) {
+    public static void onReload(ModConfig modConfig) {
         for (ConfigBase config : CONFIGS.values())
-            if (config.specification == event.getConfig()
-                    .getSpec())
+            if (config.specification == modConfig.getSpec())
                 config.onReload();
     }
 
     public static void register() {
-        ModLoadingContext context = ModLoadingContext.get();
         client = register(CClient::new, ModConfig.Type.CLIENT);
         common = register(CCommon::new, ModConfig.Type.COMMON);
         server = register(CServer::new, ModConfig.Type.SERVER);
 
         for (Map.Entry<ModConfig.Type, ConfigBase> pair : CONFIGS.entrySet())
-            context.getActiveContainer().registerConfig(pair.getKey(), pair.getValue().specification);
+            ConfigRegistry.INSTANCE.register(Copycats.MODID, pair.getKey(), pair.getValue().specification);
+        ModConfigEvents.loading(Copycats.MODID).register(CCConfigsImpl::onLoad);
+        ModConfigEvents.reloading(Copycats.MODID).register(CCConfigsImpl::onReload);
     }
 }

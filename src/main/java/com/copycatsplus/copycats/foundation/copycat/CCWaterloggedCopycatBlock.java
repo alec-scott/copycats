@@ -1,8 +1,13 @@
 package com.copycatsplus.copycats.foundation.copycat;
 
+import net.minecraft.world.level.ScheduledTickAccess;
+
+import net.minecraft.world.level.LevelReader;
+
+import net.minecraft.util.RandomSource;
+
 import com.zurrtum.create.foundation.block.ProperWaterloggedBlock;
 
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -19,7 +24,6 @@ import javax.annotation.ParametersAreNonnullByDefault;
  * another base class and can be waterlogged.
  */
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public abstract class CCWaterloggedCopycatBlock extends CCCopycatBlock implements ProperWaterloggedBlock {
 
     public CCWaterloggedCopycatBlock(Properties pProperties) {
@@ -43,9 +47,8 @@ public abstract class CCWaterloggedCopycatBlock extends CCCopycatBlock implement
     }
 
     @Override
-    public BlockState updateShape(BlockState pState, Direction pDirection, BlockState pNeighborState,
-                                  LevelAccessor pLevel, BlockPos pCurrentPos, BlockPos pNeighborPos) {
-        updateWater(pLevel, pState, pCurrentPos);
+    public BlockState updateShape(BlockState pState, LevelReader pLevel, ScheduledTickAccess ticks, BlockPos pCurrentPos, Direction pDirection, BlockPos pNeighborPos, BlockState pNeighborState, RandomSource random) {
+        updateWater(pLevel, ticks, pState, pCurrentPos);
         return pState;
     }
 

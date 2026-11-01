@@ -12,7 +12,6 @@ import com.zurrtum.create.api.schematic.requirement.SpecialBlockItemRequirement;
 import com.zurrtum.create.content.contraptions.StructureTransform;
 import com.zurrtum.create.content.equipment.wrench.IWrenchable;
 import com.zurrtum.create.content.schematics.requirement.ItemRequirement;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
@@ -33,7 +32,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
@@ -51,14 +50,13 @@ import static com.copycatsplus.copycats.utility.MathUtils.clampToGrid;
 import static com.copycatsplus.copycats.utility.MathUtils.replaceAxis;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class CopycatBytePanelBlock extends WaterloggedMultiStateCopycatBlock implements SpecialBlockItemRequirement {
     public static BooleanProperty BOTTOM_LEFT = BooleanProperty.create("bottom_left");
     public static BooleanProperty BOTTOM_RIGHT = BooleanProperty.create("bottom_right");
     public static BooleanProperty TOP_LEFT = BooleanProperty.create("top_left");
     public static BooleanProperty TOP_RIGHT = BooleanProperty.create("top_right");
-    public static DirectionProperty FACING = BlockStateProperties.FACING;
-    private final ImmutableMap<BlockState, VoxelShape> shapesCache;
+    public static EnumProperty<Direction> FACING = BlockStateProperties.FACING;
+    private final java.util.function.Function<BlockState, VoxelShape> shapesCache;
     private final ImmutableMap<FaceData, VoxelShape> partialFaceCache;
 
     public static record FaceData(String property, Direction facing, Direction direction) {
@@ -179,7 +177,7 @@ public class CopycatBytePanelBlock extends WaterloggedMultiStateCopycatBlock imp
     @SuppressWarnings("deprecation")
     @Override
     public @NotNull VoxelShape getShape(@NotNull BlockState pState, @NotNull BlockGetter pLevel, @NotNull BlockPos pPos, @NotNull CollisionContext pContext) {
-        return Objects.requireNonNull(this.shapesCache.get(pState));
+        return Objects.requireNonNull(this.shapesCache.apply(pState));
     }
 
     @Override
@@ -250,7 +248,7 @@ public class CopycatBytePanelBlock extends WaterloggedMultiStateCopycatBlock imp
                 }
             }
             BlockPos up = pos.relative(Direction.UP);
-            world.setBlockAndUpdate(pos, state.setValue(fromProperty(property), false).updateShape(Direction.UP, world.getBlockState(up), world, pos, up));
+            world.setBlockAndUpdate(pos, state.setValue(fromProperty(property), false).updateShape(world, world, pos, Direction.UP, up, world.getBlockState(up), world.getRandom()));
             IWrenchable.playRemoveSound(world, pos);
         }
         return InteractionResult.SUCCESS;

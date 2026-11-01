@@ -18,36 +18,40 @@ import com.copycatsplus.copycats.content.copycat.wall.CopycatWallBlock;
 import com.copycatsplus.copycats.foundation.copycat.CCCopycatBlock;
 import com.copycatsplus.copycats.foundation.copycat.ICopycatBlock;
 import com.zurrtum.create.AllBlocks;
+import com.zurrtum.create.foundation.block.AppearanceControlBlock;
+import com.zurrtum.create.foundation.block.EnchantingControlBlock;
+import com.zurrtum.create.foundation.block.ResistanceControlBlock;
+import com.zurrtum.create.foundation.block.SlipperinessControlBlock;
+import com.zurrtum.create.foundation.block.SoundControlBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.*;
+import net.minecraft.world.level.BlockAndLightGetter;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Mirror;
-import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
-import net.neoforged.neoforge.common.world.AuxiliaryLightManager;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
-
-import static com.copycatsplus.copycats.foundation.copycat.ICopycatBlock.getMaterial;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.phys.BlockHitResult;
 
 /**
  * Implement platform-specific methods for copycat blocks.
  * <p>
  * All non-multi-state copycats should register their blocks here instead of writing their own platform-specific implementations.
+ * <p>
+ * PORT-NOTE(26.1): NeoForge's per-position block extensions map onto Create Fly's control interfaces (the same set
+ * Create Fly's own copycats implement). Light emission, harvest checks, entity destruction and landing/running
+ * particles have no Fabric equivalent and use the copycat's own behaviour.
  */
 @Mixin({
         CCCopycatBlock.class,
@@ -64,92 +68,70 @@ import static com.copycatsplus.copycats.foundation.copycat.ICopycatBlock.getMate
         CopycatShaftBlock.class,
         CopycatFluidPipeBlock.class,
         CopycatGlassFluidPipeBlock.class,
-        CopycatDoorBlock.class,
         CopycatSlidingDoorBlock.class,
         CopycatPaneBlock.class
 })
-public abstract class CopycatBlockMixin extends Block implements ICopycatBlock {
+public abstract class CopycatBlockMixin extends Block implements ICopycatBlock, SoundControlBlock, SlipperinessControlBlock,
+        ResistanceControlBlock, EnchantingControlBlock, AppearanceControlBlock {
 
     public CopycatBlockMixin(Properties properties) {
         super(properties);
     }
 
     @Override
-    public SoundType getSoundType(BlockState state, LevelReader level, BlockPos pos, Entity entity) {
-        return getMaterial(level, pos).getSoundType();
+    public SoundType getSoundGroup(LevelReader level, BlockPos pos) {
+        BlockState material = ICopycatBlock.getMaterial(level, pos);
+        return material.isAir() ? defaultBlockState().getSoundType() : material.getSoundType();
     }
 
     @Override
-    public float getFriction(BlockState state, LevelReader level, BlockPos pos, Entity entity) {
-        return getMaterial(level, pos).getFriction(level, pos, entity);
+    public float getSlipperiness(LevelReader level, BlockPos pos) {
+        BlockState material = ICopycatBlock.getMaterial(level, pos);
+        if (material.getBlock() instanceof SlipperinessControlBlock control)
+            return control.getSlipperiness(level, pos);
+        return material.isAir() ? getFriction() : material.getBlock().getFriction();
     }
 
     @Override
-    public int getLightEmission(BlockState state, BlockGetter level, BlockPos pos) {
-        AuxiliaryLightManager lightManager = level.getAuxLightManager(pos);
-        if (lightManager != null)
-            return lightManager.getLightAt(pos);
-
-        return super.getLightEmission(state, level, pos);
+    public float getResistance(BlockGetter level, BlockPos pos) {
+        BlockState material = ICopycatBlock.getMaterial(level, pos);
+        return material.isAir() ? getExplosionResistance() : material.getBlock().getExplosionResistance();
     }
 
     @Override
-    public boolean canHarvestBlock(BlockState state, BlockGetter level, BlockPos pos, Player player) {
-        return getMaterial(level, pos).canHarvestBlock(level, pos, player);
+    public BlockState getEnchantmentPowerProvider(Level level, BlockPos pos) {
+        return ICopycatBlock.getMaterial(level, pos);
     }
 
     @Override
-    public float getExplosionResistance(BlockState state, BlockGetter level, BlockPos pos, Explosion explosion) {
-        return getMaterial(level, pos).getExplosionResistance(level, pos, explosion);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader level, BlockPos pos,
-                                       Player player) {
-        BlockState material = getMaterial(level, pos);
-        if (AllBlocks.COPYCAT_BASE.has(material) || player != null && player.isShiftKeyDown())
-            return this.getCloneItemStack(level, pos, state);
-        return material.getCloneItemStack(target, level, pos, player);
-    }
-
-    @Override
-    public boolean addLandingEffects(BlockState state1, ServerLevel level, BlockPos pos, BlockState state2,
-                                     LivingEntity entity, int numberOfParticles) {
-        return getMaterial(level, pos).addLandingEffects(level, pos, state2, entity, numberOfParticles);
-    }
-
-    @Override
-    public boolean addRunningEffects(BlockState state, Level level, BlockPos pos, Entity entity) {
-        return getMaterial(level, pos).addRunningEffects(level, pos, entity);
-    }
-
-    @Override
-    public float getEnchantPowerBonus(BlockState state, LevelReader level, BlockPos pos) {
-        return getMaterial(level, pos).getEnchantPowerBonus(level, pos);
-    }
-
-    @Override
-    public boolean canEntityDestroy(BlockState state, BlockGetter level, BlockPos pos, Entity entity) {
-        return getMaterial(level, pos).canEntityDestroy(level, pos, entity);
-    }
-
-    @Override
-    public void fallOn(@NotNull Level pLevel, @NotNull BlockState pState, @NotNull BlockPos pPos, @NotNull Entity pEntity, float p_152430_) {
-        BlockState material = getMaterial(pLevel, pPos);
-        material.getBlock()
-                .fallOn(pLevel, material, pPos, pEntity, p_152430_);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public float getDestroyProgress(@NotNull BlockState pState, @NotNull Player pPlayer, @NotNull BlockGetter pLevel, @NotNull BlockPos pPos) {
-        return getMaterial(pLevel, pPos).getDestroyProgress(pPlayer, pLevel, pPos);
-    }
-
-    @Override
-    public BlockState getAppearance(BlockState state, BlockAndTintGetter level, BlockPos pos, Direction side, @Nullable BlockState queryState, @Nullable BlockPos queryPos) {
+    public BlockState getAppearance(BlockState state, BlockAndLightGetter level, BlockPos pos, Direction side, @Nullable BlockState queryState, @Nullable BlockPos queryPos) {
         return ICopycatBlock.getAppearance(this, state, level, pos, side, queryState, queryPos);
+    }
+
+    @Override
+    protected ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state, boolean includeData) {
+        BlockState material = ICopycatBlock.getMaterial(level, pos);
+        if (material.isAir() || material.is(AllBlocks.COPYCAT_BASE))
+            return super.getCloneItemStack(level, pos, state, includeData);
+        return material.getCloneItemStack(level, pos, includeData);
+    }
+
+    @Override
+    public void fallOn(Level level, BlockState state, BlockPos pos, Entity entity, double fallDistance) {
+        BlockState material = ICopycatBlock.getMaterial(level, pos);
+        if (material.isAir()) {
+            super.fallOn(level, state, pos, entity, fallDistance);
+            return;
+        }
+        material.getBlock().fallOn(level, material, pos, entity, fallDistance);
+    }
+
+    @Override
+    protected float getDestroyProgress(BlockState state, Player player, BlockGetter level, BlockPos pos) {
+        BlockState material = ICopycatBlock.getMaterial(level, pos);
+        if (material.isAir())
+            return super.getDestroyProgress(state, player, level, pos);
+        return material.getDestroyProgress(player, level, pos);
     }
 
     /*
@@ -162,11 +144,11 @@ public abstract class CopycatBlockMixin extends Block implements ICopycatBlock {
 
     @Override
     @Unique
-    public abstract BlockState mirror(@NotNull BlockState pState, @NotNull Mirror pMirror);
+    public abstract BlockState mirror(BlockState state, Mirror mirror);
 
     @Override
     @Unique
-    public abstract ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult);
+    public abstract InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult);
 
     @Override
     @Unique

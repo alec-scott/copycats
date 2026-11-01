@@ -5,7 +5,7 @@ import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
 import net.minecraft.data.recipes.SimpleCookingRecipeBuilder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -31,13 +31,13 @@ public interface GeneratedRecipeBuilder {
 
     GeneratedRecipeBuilder requiresResultFeature();
 
-    GeneratedRecipeBuilder requiresFeature(ResourceLocation location);
+    GeneratedRecipeBuilder requiresFeature(Identifier location);
 
     GeneratedRecipeBuilder requiresFeature(BlockEntry<?> block);
 
     GeneratedRecipeBuilder requiresFeature(BlockEntry<?> block, boolean invert);
 
-    GeneratedRecipeBuilder requiresFeature(ResourceLocation location, boolean invert);
+    GeneratedRecipeBuilder requiresFeature(Identifier location, boolean invert);
 
     GeneratedRecipe handleConditions(Consumer<RecipeOutput> recipe);
 

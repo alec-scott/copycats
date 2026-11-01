@@ -34,6 +34,7 @@ dependencies {
     implementation "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:${forgeconfigapiport_version}"
 
     implementation files(create_fly_jar)
+    compileOnly 'com.google.code.findbugs:jsr305:3.0.2' // javax.annotation nullability annotations
 
     // Used by the relocated Registrate port (com.copycatsplus.copycats.port.registrate)
     compileOnly "org.projectlombok:lombok:1.18.42"

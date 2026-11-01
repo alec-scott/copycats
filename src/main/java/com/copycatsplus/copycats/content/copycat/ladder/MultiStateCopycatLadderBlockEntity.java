@@ -15,7 +15,7 @@ public class MultiStateCopycatLadderBlockEntity extends MultiStateCopycatBlockEn
     }
 
     @Override
-    public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
+    public void addBehaviours(List<BlockEntityBehaviour<?>> behaviours) {
         super.addBehaviours(behaviours);
         //TODO: Add selection screen thing for picking ladder type (rails only, steps only or both)
     }

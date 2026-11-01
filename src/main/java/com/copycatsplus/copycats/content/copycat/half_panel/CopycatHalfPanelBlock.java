@@ -13,14 +13,12 @@ import com.zurrtum.create.infrastructure.config.AllConfigs;
 import com.zurrtum.create.catnip.placement.IPlacementHelper;
 import com.zurrtum.create.catnip.placement.PlacementHelpers;
 import com.zurrtum.create.catnip.placement.PlacementOffset;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -32,7 +30,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -47,17 +45,16 @@ import java.util.function.Predicate;
 import static com.copycatsplus.copycats.utility.BlockUtils.transformFacing;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class CopycatHalfPanelBlock extends CCWaterloggedCopycatBlock implements IStateType {
 
     /**
      * The direction where the base of the half panel is facing.
      */
-    public static final DirectionProperty FACING = BlockStateProperties.FACING;
+    public static final EnumProperty<Direction> FACING = BlockStateProperties.FACING;
     /**
      * The direction of the half panel within the block face.
      */
-    public static final DirectionProperty OFFSET = DirectionProperty.create("offset", Direction.Plane.HORIZONTAL);
+    public static final EnumProperty<Direction> OFFSET = EnumProperty.create("offset", Direction.class, Direction.Plane.HORIZONTAL);
 
     private static final int placementHelperId = PlacementHelpers.register(new PlacementHelper());
 
@@ -70,7 +67,7 @@ public class CopycatHalfPanelBlock extends CCWaterloggedCopycatBlock implements 
     }
 
     @Override
-    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+    public InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         return InteractionUtils.sequentialItem(
                 () -> InteractionUtils.usePlacementHelper(placementHelperId, stack, state, level, pos, player, hand, hitResult),
                 () -> super.useItemOn(stack, state, level, pos, player, hand, hitResult)
@@ -153,9 +150,9 @@ public class CopycatHalfPanelBlock extends CCWaterloggedCopycatBlock implements 
     public BlockState transform(BlockState state, StructureTransform transform) {
         Direction facing = state.getValue(FACING);
         Direction offset = state.getValue(OFFSET);
-        Vec3i offsetNormal = transform.applyWithoutOffset(new BlockPos(getOffsetFacing(facing, offset).getNormal()));
+        Vec3i offsetNormal = transform.applyWithoutOffset(new BlockPos(getOffsetFacing(facing, offset).getUnitVec3i()));
         Direction newFacing = transformFacing(transform, facing);
-        Vec3i facingNormal = newFacing.getNormal();
+        Vec3i facingNormal = newFacing.getUnitVec3i();
         if (offsetNormal.getY() != 0) {
             if (offsetNormal.getX() == 0 && facingNormal.getX() != 0) {
                 offsetNormal = new Vec3i(offsetNormal.getY(), offsetNormal.getX(), offsetNormal.getZ());
@@ -165,7 +162,7 @@ public class CopycatHalfPanelBlock extends CCWaterloggedCopycatBlock implements 
         }
         return state
                 .setValue(FACING, newFacing)
-                .setValue(OFFSET, Objects.requireNonNull(Direction.fromDelta(offsetNormal.getX(), offsetNormal.getY(), offsetNormal.getZ())));
+                .setValue(OFFSET, Objects.requireNonNull(com.copycatsplus.copycats.utility.DirectionUtils.fromDelta(offsetNormal.getX(), offsetNormal.getY(), offsetNormal.getZ())));
     }
 
     /**
@@ -174,15 +171,15 @@ public class CopycatHalfPanelBlock extends CCWaterloggedCopycatBlock implements 
     public static Direction getOffsetFacing(Direction facing, Direction offset) {
         if (offset.getAxis().isVertical()) throw new IllegalArgumentException("offset must be a horizontal direction.");
 
-        Vec3i facingNormal = facing.getNormal();
-        Vec3i offsetNormal = offset.getNormal();
+        Vec3i facingNormal = facing.getUnitVec3i();
+        Vec3i offsetNormal = offset.getUnitVec3i();
         if (facingNormal.getX() != 0 && offsetNormal.getX() != 0) {
             offsetNormal = new Vec3i(offsetNormal.getY(), offsetNormal.getX(), offsetNormal.getZ());
         }
         if (facingNormal.getZ() != 0 && offsetNormal.getZ() != 0) {
             offsetNormal = new Vec3i(offsetNormal.getX(), offsetNormal.getZ(), offsetNormal.getY());
         }
-        return Objects.requireNonNull(Direction.fromDelta(offsetNormal.getX(), offsetNormal.getY(), offsetNormal.getZ()));
+        return Objects.requireNonNull(com.copycatsplus.copycats.utility.DirectionUtils.fromDelta(offsetNormal.getX(), offsetNormal.getY(), offsetNormal.getZ()));
     }
 
     /**
@@ -195,7 +192,6 @@ public class CopycatHalfPanelBlock extends CCWaterloggedCopycatBlock implements 
         else return Axis.Y;
     }
 
-    @MethodsReturnNonnullByDefault
     private static class PlacementHelper extends PoleHelper<Direction> {
 
         private PlacementHelper() {

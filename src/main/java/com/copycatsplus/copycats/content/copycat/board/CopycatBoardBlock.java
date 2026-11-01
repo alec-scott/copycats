@@ -16,7 +16,6 @@ import com.zurrtum.create.content.contraptions.StructureTransform;
 import com.zurrtum.create.content.equipment.wrench.IWrenchable;
 import com.zurrtum.create.content.schematics.requirement.ItemRequirement;
 import com.zurrtum.create.catnip.data.Iterate;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
@@ -28,7 +27,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.BlockAndLightGetter;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -57,7 +56,6 @@ import java.util.stream.Collectors;
 import static com.copycatsplus.copycats.utility.BlockUtils.transformFacing;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class CopycatBoardBlock extends WaterloggedMultiStateCopycatBlock implements ICustomCTBlocking, SpecialBlockItemRequirement {
     public static BooleanProperty UP = BlockStateProperties.UP;
     public static BooleanProperty DOWN = BlockStateProperties.DOWN;
@@ -66,7 +64,7 @@ public class CopycatBoardBlock extends WaterloggedMultiStateCopycatBlock impleme
     public static BooleanProperty EAST = BlockStateProperties.EAST;
     public static BooleanProperty WEST = BlockStateProperties.WEST;
     public static final Map<Direction, BooleanProperty> PROPERTY_BY_DIRECTION = PipeBlock.PROPERTY_BY_DIRECTION;
-    private final ImmutableMap<BlockState, VoxelShape> shapesCache;
+    private final java.util.function.Function<BlockState, VoxelShape> shapesCache;
     private final ImmutableMap<FaceData, VoxelShape> partialFaceCache;
 
     public static record FaceData(String property, Direction direction) {
@@ -159,19 +157,19 @@ public class CopycatBoardBlock extends WaterloggedMultiStateCopycatBlock impleme
     }
 
     @Override
-    public boolean isIgnoredConnectivitySide(BlockAndTintGetter reader, BlockState state, Direction face, BlockPos fromPos, @Nullable BlockPos toPos, @Nullable BlockState toState) {
+    public boolean isIgnoredConnectivitySide(BlockAndLightGetter reader, BlockState state, Direction face, BlockPos fromPos, @Nullable BlockPos toPos, @Nullable BlockState toState) {
         if (toPos == null)
             return true;
         return !reader.getBlockState(toPos).is(this);
     }
 
     @Override
-    public boolean canConnectTexturesToward(String property, BlockAndTintGetter reader, BlockPos fromPos, BlockPos toPos, BlockState state) {
+    public boolean canConnectTexturesToward(String property, BlockAndLightGetter reader, BlockPos fromPos, BlockPos toPos, BlockState state) {
         return reader.getBlockState(toPos).is(this);
     }
 
     @Override
-    public Optional<Boolean> blockCTTowards(BlockAndTintGetter reader, BlockState state, BlockPos pos, BlockPos ctPos, BlockPos connectingPos, Direction face) {
+    public Optional<Boolean> blockCTTowards(BlockAndLightGetter reader, BlockState state, BlockPos pos, BlockPos ctPos, BlockPos connectingPos, Direction face) {
         if (!reader.getBlockState(ctPos).is(this)) return Optional.empty();
         return Optional.of(false);
     }
@@ -197,7 +195,7 @@ public class CopycatBoardBlock extends WaterloggedMultiStateCopycatBlock impleme
     @SuppressWarnings("deprecation")
     @Override
     public @NotNull VoxelShape getShape(@NotNull BlockState pState, @NotNull BlockGetter pLevel, @NotNull BlockPos pPos, @NotNull CollisionContext pContext) {
-        return Objects.requireNonNull(this.shapesCache.get(pState));
+        return Objects.requireNonNull(this.shapesCache.apply(pState));
     }
 
     @Override
@@ -233,7 +231,7 @@ public class CopycatBoardBlock extends WaterloggedMultiStateCopycatBlock impleme
         if (!pState.getValue(byDirection(pUseContext.getClickedFace().getOpposite()))) {
             Direction direction = pUseContext.getClickedFace().getOpposite();
             double pos = getByAxis(pUseContext.getClickedPos(), direction.getAxis());
-            if (getByAxis(direction.getNormal(), direction.getAxis()) > 0) pos += 1;
+            if (getByAxis(direction.getUnitVec3i(), direction.getAxis()) > 0) pos += 1;
             double loc = getByAxis(pUseContext.getClickLocation(), direction.getAxis());
             if (Math.abs(pos - loc) < 2 / 16.0) {
                 return true;
@@ -241,7 +239,7 @@ public class CopycatBoardBlock extends WaterloggedMultiStateCopycatBlock impleme
         }
         if (!pState.getValue(byDirection(pUseContext.getClickedFace()))) {
             double hitLoc = getByAxis(pUseContext.getClickLocation(), pUseContext.getClickedFace().getAxis());
-            int direction = getByAxis(pUseContext.getClickedFace().getNormal(), pUseContext.getClickedFace().getAxis());
+            int direction = getByAxis(pUseContext.getClickedFace().getUnitVec3i(), pUseContext.getClickedFace().getAxis());
             double offset = hitLoc - Math.round(hitLoc);
             if (Mth.sign(direction) == Mth.sign(offset) && Math.abs(offset) < 2 / 16.0) {
                 return true;
@@ -263,7 +261,7 @@ public class CopycatBoardBlock extends WaterloggedMultiStateCopycatBlock impleme
         for (Direction direction : Iterate.directions) {
             if (!state.getValue(byDirection(direction))) continue;
             double pos = getByAxis(context.getClickedPos(), direction.getAxis());
-            if (getByAxis(direction.getNormal(), direction.getAxis()) > 0) pos += 1;
+            if (getByAxis(direction.getUnitVec3i(), direction.getAxis()) > 0) pos += 1;
             double loc = getByAxis(context.getClickLocation(), direction.getAxis());
             if (Math.abs(pos - loc) < 2 / 16.0) {
                 options.add(direction);
@@ -291,7 +289,7 @@ public class CopycatBoardBlock extends WaterloggedMultiStateCopycatBlock impleme
                 }
             }
             BlockPos up = pos.relative(Direction.UP);
-            world.setBlockAndUpdate(pos, state.setValue(byDirection(options.get(0)), false).updateShape(Direction.UP, world.getBlockState(up), world, pos, up));
+            world.setBlockAndUpdate(pos, state.setValue(byDirection(options.get(0)), false).updateShape(world, world, pos, Direction.UP, up, world.getBlockState(up), world.getRandom()));
             IWrenchable.playRemoveSound(world, pos);
         }
         return InteractionResult.SUCCESS;

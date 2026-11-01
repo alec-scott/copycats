@@ -1,0 +1,5 @@
+{
+  "asset_id": "copycats:entity/cat/copy_cat",
+  "baby_asset_id": "minecraft:entity/cat/cat_all_black_baby",
+  "spawn_conditions": []
+}

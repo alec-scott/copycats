@@ -8,7 +8,7 @@ import net.createmod.catnip.platform.CatnipServices;
 import com.zurrtum.create.catnip.registry.RegisteredObjectsHelper;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.data.recipes.*;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -32,7 +32,7 @@ public class GeneratedRecipeBuilderNeoForge implements GeneratedRecipeBuilder {
     private String path = "";
     private String suffix;
     private Supplier<? extends ItemLike> result;
-    private ResourceLocation compatDatagenOutput;
+    private Identifier compatDatagenOutput;
 
     private Supplier<ItemPredicate> unlockedBy;
     private int amount;
@@ -48,7 +48,7 @@ public class GeneratedRecipeBuilderNeoForge implements GeneratedRecipeBuilder {
         this.result = result;
     }
 
-    public GeneratedRecipeBuilderNeoForge(String path, ResourceLocation result) {
+    public GeneratedRecipeBuilderNeoForge(String path, Identifier result) {
         this(path);
         compatDatagenOutput = result;
     }
@@ -101,24 +101,24 @@ public class GeneratedRecipeBuilderNeoForge implements GeneratedRecipeBuilder {
         });
     }
 
-    private ResourceLocation clean(ResourceLocation loc) {
+    private Identifier clean(Identifier loc) {
         String path = loc.getPath();
         while (path.contains("//"))
             path = path.replaceAll("//", "/");
-        return ResourceLocation.fromNamespaceAndPath(loc.getNamespace(), path);
+        return Identifier.fromNamespaceAndPath(loc.getNamespace(), path);
     }
 
-    private ResourceLocation createSimpleLocation(String recipeType) {
-        ResourceLocation loc = clean(Copycats.asResource(recipeType + "/" + getRegistryName().getPath() + suffix));
+    private Identifier createSimpleLocation(String recipeType) {
+        Identifier loc = clean(Copycats.asResource(recipeType + "/" + getRegistryName().getPath() + suffix));
         return loc;
     }
 
-    protected ResourceLocation createLocation(String recipeType) {
-        ResourceLocation loc = clean(Copycats.asResource(recipeType + "/" + path + "/" + getRegistryName().getPath() + suffix));
+    protected Identifier createLocation(String recipeType) {
+        Identifier loc = clean(Copycats.asResource(recipeType + "/" + path + "/" + getRegistryName().getPath() + suffix));
         return loc;
     }
 
-    private ResourceLocation getRegistryName() {
+    private Identifier getRegistryName() {
         return compatDatagenOutput == null ? RegisteredObjectsHelper.getKeyOrThrow(result.get()
                 .asItem()) : compatDatagenOutput;
     }
@@ -130,7 +130,7 @@ public class GeneratedRecipeBuilderNeoForge implements GeneratedRecipeBuilder {
     }
 
     @Override
-    public GeneratedRecipeBuilder requiresFeature(ResourceLocation location) {
+    public GeneratedRecipeBuilder requiresFeature(Identifier location) {
         return requiresFeature(location, false);
     }
 
@@ -145,7 +145,7 @@ public class GeneratedRecipeBuilderNeoForge implements GeneratedRecipeBuilder {
     }
 
     @Override
-    public GeneratedRecipeBuilder requiresFeature(ResourceLocation location, boolean invert) {
+    public GeneratedRecipeBuilder requiresFeature(Identifier location, boolean invert) {
         recipeConditions.add(new FeatureEnabledCondition(location, invert));
         return this;
     }

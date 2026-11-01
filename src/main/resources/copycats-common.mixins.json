@@ -6,6 +6,7 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "port.SmartBlockEntityMixin",
+    "port.SpawnPlacementsAccessor",
     "copycat.SyncedBlockEntityMixin",
     "copycat.VoxelShapeAccessor",
     "copycat.cogwheel.CogWheelBlockItemMixin",
@@ -17,7 +18,6 @@
     "copycat.slab.SeatMovementBehaviourMixin",
     "copycat.slab.TrackPlacementMixin",
     "copycat.slab.WalkNodeEvaluatorMixin",
-    "copycat.sliding_door.SlidingDoorBlockEntityAccessor",
     "copycat.step.CopycatStepBlockMixin",
     "copycat.trapdoor.LivingEntityMixin",
     "entity.CatMixin",
@@ -32,17 +32,12 @@
     "foundation.copycat.CopycatBlockEntityMixin",
     "foundation.copycat.CopycatBlockMixin",
     "foundation.copycat.RotatedPillarCTBehaviourMixin",
-    "foundation.copycat.kinetic.CreateClientMixin",
-    "foundation.copycat.migration.ContraptionMixin",
-    "foundation.copycat.migration.LevelChunkMixin",
-    "foundation.copycat.migration.StructureTemplateMixin",
     "foundation.copycat.multistate.AirCurrentMixin"
   ],
   "client": [
+    "foundation.copycat.kinetic.CreateClientMixin",
     "foundation.copycat.ClientLevelMixin",
-    "foundation.copycat.CTModelMixin",
-    "foundation.copycat.LiquidBlockRendererMixin",
-    "foundation.copycat.multistate.ModelBlockRendererMixin"
+    "foundation.copycat.CTModelMixin"
   ],
   "injectors": {
     "defaultRequire": 1

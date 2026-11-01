@@ -5,7 +5,8 @@ import com.zurrtum.create.content.decoration.copycat.CopycatBlockEntity;
 import com.zurrtum.create.foundation.blockEntity.SmartBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -52,28 +53,20 @@ public abstract class CopycatBlockEntityMixin implements ICopycatBlockEntity {
         this.copycats$enableCT = value;
     }
 
-    @Override
-    @Unique
-    public void onLoad() {
-        ICopycatBlockEntity.super.onLoad();
-    }
-
     @Inject(
             at = @At("HEAD"),
-            method = "write(Lnet/minecraft/nbt/CompoundTag;Lnet/minecraft/core/HolderLookup$Provider;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/level/block/state/BlockState;)V"
+            method = "write(Lnet/minecraft/world/level/storage/ValueOutput;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/level/block/state/BlockState;)V"
     )
-    private void writeCT(CompoundTag tag, HolderLookup.Provider registries, ItemStack stack, BlockState material, CallbackInfo ci) {
-        tag.putBoolean("EnableCT", copycats$enableCT);
+    private void writeCT(ValueOutput view, ItemStack stack, BlockState material, CallbackInfo ci) {
+        view.putBoolean("EnableCT", copycats$enableCT);
     }
 
     @Inject(
             at = @At("HEAD"),
             method = "read"
     )
-    private void readCT(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket, CallbackInfo ci) {
-        if (tag.contains("EnableCT")) // need to check because copycats migrated from C:Connected don't have this tag
-            copycats$enableCT = tag.getBoolean("EnableCT");
-        else
-            copycats$enableCT = true;
+    private void readCT(ValueInput view, boolean clientPacket, CallbackInfo ci) {
+        // EnableCT may be missing on copycats migrated from C:Connected
+        copycats$enableCT = view.getBooleanOr("EnableCT", true);
     }
 }

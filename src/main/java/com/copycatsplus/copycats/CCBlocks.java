@@ -85,12 +85,10 @@ import com.copycatsplus.copycats.content.copycat.wall.CopycatWallModelCore;
 import com.copycatsplus.copycats.foundation.tooltip.CopycatCharacteristics;
 import com.copycatsplus.copycats.foundation.tooltip.CopycatDescription;
 import com.copycatsplus.copycats.utility.Platform;
-import com.simibubi.create.AllTags;
 import com.zurrtum.create.content.contraptions.behaviour.DoorMovingInteraction;
 import com.zurrtum.create.content.decoration.slidingDoor.SlidingDoorMovementBehaviour;
 import com.zurrtum.create.client.infrastructure.model.BracketedKineticBlockModel;
 import com.zurrtum.create.content.kinetics.simpleRelays.CogwheelBlockItem;
-import com.simibubi.create.foundation.data.BuilderTransformers;
 import com.copycatsplus.copycats.port.create.foundation.data.CreateRegistrate;
 import com.copycatsplus.copycats.port.create.foundation.data.SharedProperties;
 import com.copycatsplus.copycats.port.registrate.providers.DataGenContext;
@@ -113,8 +111,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static com.copycatsplus.copycats.CCCustomModels.*;
-import static com.zurrtum.create.api.behaviour.interaction.MovingInteractionBehaviour.interactionBehaviour;
-import static com.zurrtum.create.api.behaviour.movement.MovementBehaviour.movementBehaviour;
 import static com.zurrtum.create.api.contraption.BlockMovementChecks.CheckResult;
 import static com.zurrtum.create.api.contraption.BlockMovementChecks.registerBrittleCheck;
 import static com.copycatsplus.copycats.port.create.foundation.data.CreateRegistrate.blockModel;
@@ -129,7 +125,7 @@ public class CCBlocks {
 
     public static final BlockEntry<WrappedCopycatBlock> WRAPPED_COPYCAT =
             REGISTRATE.block("wrapped_copycat", WrappedCopycatBlock::new)
-                    .transform(BuilderTransformers.copycat())
+                    .transform(CCBuilderTransformers.copycat())
                     .register();
 
     public static final BlockEntry<CopycatBaseBlock> COPYCAT_BASE =
@@ -184,7 +180,7 @@ public class CCBlocks {
             REGISTRATE.block("copycat_wooden_button", p -> new CopycatButtonBlock(BlockSetType.OAK, 30, p))
                     .transform(CCBuilderTransformers.copycat())
                     .properties(p -> p.isValidSpawn((state, level, pos, entity) -> false)
-                            .noCollission())
+                            .noCollision())
                     .transform(FeatureToggle.register(FeatureCategory.REDSTONE, FeatureCategory.FUNCTIONAL))
                     .onRegister(onClient(() -> createBlockModel(CopycatButtonModelCore::new)))
                     .item()
@@ -199,7 +195,7 @@ public class CCBlocks {
             REGISTRATE.block("copycat_stone_button", p -> new CopycatButtonBlock(BlockSetType.STONE, 20, p))
                     .transform(CCBuilderTransformers.copycat())
                     .properties(p -> p.isValidSpawn((state, level, pos, entity) -> false)
-                            .noCollission())
+                            .noCollision())
                     .transform(FeatureToggle.register(FeatureCategory.REDSTONE, FeatureCategory.FUNCTIONAL))
                     .onRegister(onClient(() -> createBlockModel(CopycatButtonModelCore::new)))
                     .item()
@@ -269,7 +265,7 @@ public class CCBlocks {
             REGISTRATE.block("copycat_ghost_block", CopycatGhostBlock::new)
                     .transform(CCBuilderTransformers.copycat())
                     .properties(p -> p.isValidSpawn((state, level, pos, entity) -> false)
-                            .noCollission())
+                            .noCollision())
                     .transform(FeatureToggle.register())
                     .onRegister(onClient(() -> createBlockModel(CopycatGhostBlockModelCore::new)))
                     .item()
@@ -371,7 +367,7 @@ public class CCBlocks {
             REGISTRATE.block("copycat_wooden_pressure_plate", p -> new CopycatPressurePlateBlock(BlockSetType.OAK, p))
                     .transform(CCBuilderTransformers.copycat())
                     .properties(p -> p.isValidSpawn((state, level, pos, entity) -> false)
-                            .noCollission())
+                            .noCollision())
                     .transform(FeatureToggle.register(FeatureCategory.REDSTONE, FeatureCategory.FUNCTIONAL))
                     .onRegister(onClient(() -> createBlockModel(CopycatPressurePlateModelCore::new)))
                     .item()
@@ -386,7 +382,7 @@ public class CCBlocks {
             REGISTRATE.block("copycat_stone_pressure_plate", p -> new CopycatPressurePlateBlock(BlockSetType.STONE, p))
                     .transform(CCBuilderTransformers.copycat())
                     .properties(p -> p.isValidSpawn((state, level, pos, entity) -> false)
-                            .noCollission())
+                            .noCollision())
                     .transform(FeatureToggle.register(FeatureCategory.REDSTONE, FeatureCategory.FUNCTIONAL))
                     .onRegister(onClient(() -> createBlockModel(CopycatPressurePlateModelCore::new)))
                     .item()
@@ -401,7 +397,7 @@ public class CCBlocks {
             REGISTRATE.block("copycat_heavy_weighted_pressure_plate", p -> new CopycatWeightedPressurePlate(150, BlockSetType.IRON, p))
                     .transform(CCBuilderTransformers.copycat())
                     .properties(p -> p.isValidSpawn((state, level, pos, entity) -> false)
-                            .noCollission())
+                            .noCollision())
                     .transform(FeatureToggle.register(FeatureCategory.REDSTONE, FeatureCategory.FUNCTIONAL))
                     .onRegister(onClient(() -> createBlockModel(CopycatPressurePlateModelCore::new)))
                     .item()
@@ -416,7 +412,7 @@ public class CCBlocks {
             REGISTRATE.block("copycat_light_weighted_pressure_plate", p -> new CopycatWeightedPressurePlate(15, BlockSetType.GOLD, p))
                     .transform(CCBuilderTransformers.copycat())
                     .properties(p -> p.isValidSpawn((state, level, pos, entity) -> false)
-                            .noCollission())
+                            .noCollision())
                     .transform(FeatureToggle.register(FeatureCategory.REDSTONE, FeatureCategory.FUNCTIONAL))
                     .onRegister(onClient(() -> createBlockModel(CopycatPressurePlateModelCore::new)))
                     .item()
@@ -431,7 +427,7 @@ public class CCBlocks {
             REGISTRATE.block("copycat_slab", CopycatSlabBlock::new)
                     .transform(CCBuilderTransformers.multiCopycat())
                     .transform(FeatureToggle.register(FeatureCategory.MULTISTATES))
-                    .onRegister(onClient(() -> blockModel(() -> model -> CopycatModelCore.createModel(model, new CopycatMultiSlabModelCore()))))
+                    .onRegister(onClient(() -> blockModel(() -> (state, model) -> CopycatModelCore.createModel(state, model, new CopycatMultiSlabModelCore()))))
                     .item()
                     .onRegister(CopycatDescription.register(
                             CopycatCharacteristics.COPYCAT,
@@ -652,7 +648,7 @@ public class CCBlocks {
             REGISTRATE.block("copycat_fluid_pipe", CopycatFluidPipeBlock::new)
                     .transform(CCBuilderTransformers.copycat())
                     .transform(FeatureToggle.register(FeatureCategory.FUNCTIONAL, FeatureCategory.CREATE))
-                    .onRegister(onClient(() -> CreateRegistrate.blockModel(() -> model -> getFluidPipeModel(model, new CopycatFluidPipeModelCore(), false))))
+                    .onRegister(onClient(() -> CreateRegistrate.blockModel(() -> (state, model) -> getFluidPipeModel(state, model, new CopycatFluidPipeModelCore(), false))))
                     .item()
                     .onRegister(CopycatDescription.register(
                             CopycatCharacteristics.COPYCAT,
@@ -664,14 +660,14 @@ public class CCBlocks {
     public static final BlockEntry<CopycatGlassFluidPipeBlock> COPYCAT_GLASS_FLUID_PIPE =
             REGISTRATE.block("copycat_glass_fluid_pipe", CopycatGlassFluidPipeBlock::new)
                     .transform(CCBuilderTransformers.copycat())
-                    .onRegister(onClient(() -> CreateRegistrate.blockModel(() -> model -> getFluidPipeModel(model, new CopycatStraightPipeModelCore(), false))))
+                    .onRegister(onClient(() -> CreateRegistrate.blockModel(() -> (state, model) -> getFluidPipeModel(state, model, new CopycatStraightPipeModelCore(), false))))
                     .register();
 
     public static final BlockEntry<CopycatDoorBlock> COPYCAT_DOOR =
             REGISTRATE.block("copycat_door", p -> new CopycatDoorBlock(BlockSetType.OAK, p))
                     .transform(CCBuilderTransformers.copycat())
                     .transform(FeatureToggle.register(FeatureCategory.FUNCTIONAL))
-                    .onRegister(interactionBehaviour(new DoorMovingInteraction()))
+                    .onRegister(b -> com.zurrtum.create.api.behaviour.interaction.MovingInteractionBehaviour.REGISTRY.register(b, new DoorMovingInteraction()))
                     .onRegister(onClient(() -> createBlockModel(CopycatDoorModelCore::new)))
                     .onRegister(b -> registerBrittleCheck(state -> state.getBlock() == b ? CheckResult.SUCCESS : CheckResult.PASS))
                     .item()
@@ -688,7 +684,7 @@ public class CCBlocks {
                     .transform(CCBuilderTransformers.copycat())
                     .transform(FeatureToggle.register(FeatureCategory.FUNCTIONAL))
                     .onRegister(onClient(() -> createBlockModel(CopycatDoorModelCore::new)))
-                    .onRegister(interactionBehaviour(new DoorMovingInteraction()))
+                    .onRegister(b -> com.zurrtum.create.api.behaviour.interaction.MovingInteractionBehaviour.REGISTRY.register(b, new DoorMovingInteraction()))
                     .onRegister(b -> registerBrittleCheck(state -> state.getBlock() == b ? CheckResult.SUCCESS : CheckResult.PASS))
                     .item()
                     .onRegister(CopycatDescription.register(
@@ -717,8 +713,8 @@ public class CCBlocks {
                     .transform(CCBuilderTransformers.copycat())
                     .transform(FeatureToggle.register(FeatureCategory.FUNCTIONAL))
                     .onRegister(onClient(() -> createBlockModel(() -> new CopycatSlidingDoorModelCore(false))))
-                    .onRegister(interactionBehaviour(new DoorMovingInteraction()))
-                    .onRegister(movementBehaviour(new SlidingDoorMovementBehaviour())) // for villager AI
+                    .onRegister(b -> com.zurrtum.create.api.behaviour.interaction.MovingInteractionBehaviour.REGISTRY.register(b, new DoorMovingInteraction()))
+                    .onRegister(b -> com.zurrtum.create.api.behaviour.movement.MovementBehaviour.REGISTRY.register(b, new SlidingDoorMovementBehaviour())) // for villager AI
                     .onRegister(b -> registerBrittleCheck(state -> state.getBlock() == b ? CheckResult.SUCCESS : CheckResult.PASS))
                     .item()
                     .onRegister(CopycatDescription.register(
@@ -734,8 +730,8 @@ public class CCBlocks {
                     .transform(CCBuilderTransformers.copycat())
                     .transform(FeatureToggle.register(FeatureCategory.FUNCTIONAL))
                     .onRegister(onClient(() -> createBlockModel(() -> new CopycatFoldingDoorModelCore(false, false))))
-                    .onRegister(interactionBehaviour(new DoorMovingInteraction()))
-                    .onRegister(movementBehaviour(new SlidingDoorMovementBehaviour())) // for villager AI
+                    .onRegister(b -> com.zurrtum.create.api.behaviour.interaction.MovingInteractionBehaviour.REGISTRY.register(b, new DoorMovingInteraction()))
+                    .onRegister(b -> com.zurrtum.create.api.behaviour.movement.MovementBehaviour.REGISTRY.register(b, new SlidingDoorMovementBehaviour())) // for villager AI
                     .onRegister(b -> registerBrittleCheck(state -> state.getBlock() == b ? CheckResult.SUCCESS : CheckResult.PASS))
                     .item()
                     .onRegister(CopycatDescription.register(

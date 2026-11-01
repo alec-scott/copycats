@@ -1,31 +1,17 @@
 package com.copycatsplus.copycats;
 
-import com.zurrtum.create.catnip.data.Pair;
-import net.minecraft.core.Holder;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.animal.CatVariant;
+import net.minecraft.world.entity.animal.feline.CatVariant;
 
-import java.util.LinkedList;
-import java.util.List;
-
+/**
+ * PORT-NOTE(26.1): cat variants are data driven; the copy cat is {@code data/copycats/cat_variant/copy_cat.json}
+ * (no spawn conditions, so it never spawns naturally). 26.1 also needs a kitten texture, which Copycats+ doesn't
+ * have, so copy cat kittens use the all-black kitten texture.
+ */
 public class CCCatVariants {
-    protected static final List<Pair<Holder.Reference<CatVariant>, ResourceLocation>> ENTRIES = new LinkedList<>();
-
-    public static final Holder.Reference<CatVariant> COPY_CAT = register("copy_cat", Copycats.asResource("textures/entity/cat/copy_cat.png"));
-
-    private static Holder.Reference<CatVariant> register(String key, ResourceLocation texture) {
-        Pair<Holder.Reference<CatVariant>, ResourceLocation> pair = Pair.of(Holder.Reference.createStandAlone(
-                BuiltInRegistries.CAT_VARIANT.holderOwner(),
-                ResourceKey.create(Registries.CAT_VARIANT, Copycats.asResource(key))
-        ), texture);
-        ENTRIES.add(pair);
-        return pair.getFirst();
-    }
+    public static final ResourceKey<CatVariant> COPY_CAT = ResourceKey.create(Registries.CAT_VARIANT, Copycats.asResource("copy_cat"));
 
     public static void register() {
-
-    com.copycatsplus.copycats.fabric.CCCatVariantsImpl.register();}
+    }
 }

@@ -8,13 +8,13 @@ import io.netty.buffer.ByteBuf;
 import com.zurrtum.create.catnip.codecs.stream.CatnipStreamCodecBuilders;
 import com.zurrtum.create.catnip.codecs.stream.CatnipStreamCodecs;
 import com.copycatsplus.copycats.port.catnip.config.ConfigBase;
-import net.createmod.catnip.net.base.ClientboundPacketPayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.codec.StreamCodec;
 import net.neoforged.fml.config.ModConfig;
 
-public record ConfigSyncPacket(CompoundTag config, ModConfig.Type configType) implements ClientboundPacketPayload {
+public record ConfigSyncPacket(CompoundTag config, ModConfig.Type configType) implements CustomPacketPayload {
 
     public static final StreamCodec<ByteBuf, ModConfig.Type> CONFIG_TYPE_CODEC = CatnipStreamCodecBuilders.ofEnum(ModConfig.Type.class);
 
@@ -24,7 +24,6 @@ public record ConfigSyncPacket(CompoundTag config, ModConfig.Type configType) im
             ((tag, type) -> tag instanceof CompoundTag comp ? new ConfigSyncPacket(comp, type) : null)
     );
 
-    @Override
     public void handle(LocalPlayer localPlayer) {
         Platform.Environment.CLIENT.runIfCurrent(() -> () -> {
             ConfigBase config = CCConfigs.byType(configType);
@@ -38,7 +37,7 @@ public record ConfigSyncPacket(CompoundTag config, ModConfig.Type configType) im
     }
 
     @Override
-    public PacketTypeProvider getTypeProvider() {
+    public Type<? extends CustomPacketPayload> type() {
         return CCPackets.CONFIG_SYNC;
     }
 }

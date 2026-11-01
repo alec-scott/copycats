@@ -3,15 +3,13 @@ package com.copycatsplus.copycats.utility;
 import com.copycatsplus.copycats.foundation.copycat.ICopycatBlockEntity;
 import com.copycatsplus.copycats.foundation.copycat.multistate.IMultiStateCopycatBlockEntity;
 import com.copycatsplus.copycats.mixin.foundation.copycat.BlockEntityAccessor;
-import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
-@MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class BlockEntityUtils {
     /**
@@ -31,8 +29,8 @@ public class BlockEntityUtils {
         }
     }
 
-    public static void saveMetadata(BlockEntity blockEntity, CompoundTag tag) {
-        ((BlockEntityAccessor) blockEntity).callSaveMetadata(tag);
+    public static void saveMetadata(BlockEntity blockEntity, ValueOutput view) {
+        ((BlockEntityAccessor) blockEntity).callSaveMetadata(view);
     }
 
     public static void requestModelDataUpdate(BlockEntity blockEntity) {
@@ -45,11 +43,11 @@ public class BlockEntityUtils {
         if (blockEntity instanceof IMultiStateCopycatBlockEntity multiStateBE) {
             int light = 0;
             for (BlockState material : multiStateBE.getMaterialItemStorage().getAllMaterials()) {
-                light = Math.max(light, material.getLightEmission(multiStateBE.getLevel(), multiStateBE.getBlockPos()));
+                light = Math.max(light, material.getLightEmission());
             }
             return light;
         } else if (blockEntity instanceof ICopycatBlockEntity copycatBE) {
-            return copycatBE.getMaterial().getLightEmission(copycatBE.getLevel(), copycatBE.getBlockPos());
+            return copycatBE.getMaterial().getLightEmission();
         }
         return 0;
     }

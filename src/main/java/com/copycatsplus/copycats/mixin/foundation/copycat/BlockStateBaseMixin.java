@@ -2,7 +2,7 @@ package com.copycatsplus.copycats.mixin.foundation.copycat;
 
 import com.copycatsplus.copycats.compat.Mods;
 import com.zurrtum.create.content.decoration.bracket.BracketBlock;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class BlockStateBaseMixin {
 
     @Unique
-    private static final ResourceLocation COPYCAT_BASE = ResourceLocation.fromNamespaceAndPath(Mods.CREATE.id(), "copycat_base");
+    private static final Identifier COPYCAT_BASE = Identifier.fromNamespaceAndPath(Mods.CREATE.id(), "copycat_base");
 
     @Inject(
             method = "canOcclude",
@@ -24,7 +24,7 @@ public class BlockStateBaseMixin {
     private void customOcclusion(CallbackInfoReturnable<Boolean> cir) {
         BlockBehaviour.BlockStateBase instance = (BlockBehaviour.BlockStateBase) (Object) this;
         try {
-            if (instance.getBlockHolder().is(COPYCAT_BASE)) {
+            if (instance.typeHolder().is(COPYCAT_BASE)) {
                 cir.setReturnValue(false);
             }
         } catch (IllegalStateException e) {

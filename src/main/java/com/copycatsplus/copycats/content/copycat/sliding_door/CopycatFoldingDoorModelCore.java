@@ -32,7 +32,7 @@ public class CopycatFoldingDoorModelCore extends CopycatModelCore {
 
     @Override
     public void emitCopycatQuads(String key, BlockState state, CopycatRenderContext context, BlockState material) {
-        if (!kinetic && !state.getValue(SlidingDoorBlock.VISIBLE)) {
+        if (!kinetic && true /* PORT-NOTE(26.1): Create Fly renders sliding doors from the block entity only (no VISIBLE property) */) {
             return;
         }
         if (state.getValue(CopycatSlidingDoorBlock.CT)) {

@@ -2,7 +2,7 @@ package com.copycatsplus.copycats.foundation.copycat;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.BlockAndLightGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.Block;
 
@@ -35,7 +35,7 @@ public interface ICustomCTBlocking {
      * @param face          The block face that this block is blocking with.
      * @return Whether the connection between ctPos and connectingPos should be blocked by this block. Return {@link Optional#empty()} to use default logic.
      */
-    default Optional<Boolean> blockCTTowards(BlockAndTintGetter reader, BlockState state, BlockPos pos, BlockPos ctPos, BlockPos connectingPos, Direction face) {
+    default Optional<Boolean> blockCTTowards(BlockAndLightGetter reader, BlockState state, BlockPos pos, BlockPos ctPos, BlockPos connectingPos, Direction face) {
         return Optional.empty();
     }
 
@@ -50,7 +50,7 @@ public interface ICustomCTBlocking {
      * @param face          The block face that this block is trying to render.
      * @return Whether the connected textures on this block are blocked by another block. Return {@link Optional#empty()} to use default logic.
      */
-    default Optional<Boolean> isCTBlocked(BlockAndTintGetter reader, BlockState state, BlockPos pos, BlockPos connectingPos, BlockPos blockingPos, Direction face) {
+    default Optional<Boolean> isCTBlocked(BlockAndLightGetter reader, BlockState state, BlockPos pos, BlockPos connectingPos, BlockPos blockingPos, Direction face) {
         return Optional.empty();
     }
 }

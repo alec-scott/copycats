@@ -2,7 +2,7 @@ package com.copycatsplus.copycats.foundation.copycat.model.kinetic;
 
 import com.copycatsplus.copycats.foundation.copycat.model.CopycatModelCore;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.properties.Property;
 
@@ -21,7 +21,7 @@ public interface ICopycatPartialModel {
     /**
      * Get the baked model for this partial model, usually a copycat model which contains a {@link CopycatModelCore}.
      */
-    BakedModel getModel();
+    BlockStateModel getModel();
 
     /**
      * Get all the block state properties required to render this partial model. The model must not use any other properties,
@@ -29,13 +29,9 @@ public interface ICopycatPartialModel {
      */
     Property<?>[] getProperties();
 
-    static BakedModel modelOf(CopycatModelCore core) {
-        return CopycatModelCore.createKineticModel(
-                Minecraft
-                        .getInstance()
-                        .getBlockRenderer()
-                        .getBlockModel(Blocks.AIR.defaultBlockState()),
-                core
-        );
+    static BlockStateModel modelOf(CopycatModelCore core) {
+        // PORT-NOTE(26.1): built from the baked air model (no unbaked root to wrap at runtime)
+        return new com.copycatsplus.copycats.foundation.copycat.model.fabric.CopycatModelFabric(
+                CopycatModelCore.getModelOf(Blocks.AIR.defaultBlockState()), core, true);
     }
 }

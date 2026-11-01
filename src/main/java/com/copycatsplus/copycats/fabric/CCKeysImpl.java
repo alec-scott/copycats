@@ -2,26 +2,18 @@ package com.copycatsplus.copycats.fabric;
 
 import com.copycatsplus.copycats.CCKeys;
 import com.copycatsplus.copycats.Copycats;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.minecraft.client.KeyMapping;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 
-@EventBusSubscriber(modid = Copycats.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class CCKeysImpl {
+    private static final KeyMapping.Category CATEGORY = KeyMapping.Category.register(Copycats.asResource("keys"));
 
     public static void register() {
-        // no-op: registration is handled by the event subscriber
-    }
-
-    @SubscribeEvent
-    public static void register(RegisterKeyMappingsEvent event) {
         for (CCKeys key : CCKeys.values()) {
-            key.keybind = new KeyMapping(key.description, key.key, Copycats.NAME);
+            key.keybind = new KeyMapping(key.description, key.key, CATEGORY);
             if (!key.modifiable)
                 continue;
-            event.register(key.keybind);
+            KeyMappingHelper.registerKeyMapping(key.keybind);
         }
     }
 }

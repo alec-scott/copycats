@@ -11,18 +11,16 @@ import com.zurrtum.create.content.contraptions.StructureTransform;
 import com.zurrtum.create.catnip.placement.IPlacementHelper;
 import com.zurrtum.create.catnip.placement.PlacementHelpers;
 import com.zurrtum.create.catnip.placement.PlacementOffset;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.BlockAndLightGetter;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -45,7 +43,6 @@ import java.util.function.Predicate;
 
 @SuppressWarnings("deprecation")
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class CopycatFlatPaneBlock extends CCWaterloggedCopycatBlock implements IStateType, ICustomCTBlocking {
 
     public static final EnumProperty<Axis> AXIS = BlockStateProperties.AXIS;
@@ -58,7 +55,7 @@ public class CopycatFlatPaneBlock extends CCWaterloggedCopycatBlock implements I
     }
 
     @Override
-    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+    public InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         return InteractionUtils.sequentialItem(
                 () -> InteractionUtils.usePlacementHelper(placementHelperId, stack, state, level, pos, player, hand, hitResult),
                 () -> super.useItemOn(stack, state, level, pos, player, hand, hitResult)
@@ -101,14 +98,14 @@ public class CopycatFlatPaneBlock extends CCWaterloggedCopycatBlock implements I
     }
 
     @Override
-    public boolean isIgnoredConnectivitySide(BlockAndTintGetter reader, BlockState fromState, Direction face, BlockPos fromPos, @Nullable BlockPos toPos, @Nullable BlockState toState) {
+    public boolean isIgnoredConnectivitySide(BlockAndLightGetter reader, BlockState fromState, Direction face, BlockPos fromPos, @Nullable BlockPos toPos, @Nullable BlockState toState) {
         if (toPos == null)
             return true;
         toState = reader.getBlockState(toPos);
         Vec3i diff = toPos.subtract(fromPos);
         if (diff.equals(Vec3i.ZERO))
             return false;
-        Direction facing = Direction.fromDelta(diff.getX(), diff.getY(), diff.getZ());
+        Direction facing = com.copycatsplus.copycats.utility.DirectionUtils.fromDelta(diff.getX(), diff.getY(), diff.getZ());
         if (toState.getBlock() instanceof IronBarsBlock) {
             if (facing == null)
                 return true;
@@ -122,12 +119,12 @@ public class CopycatFlatPaneBlock extends CCWaterloggedCopycatBlock implements I
     }
 
     @Override
-    public boolean canConnectTexturesToward(BlockAndTintGetter reader, BlockPos fromPos, BlockPos toPos, BlockState fromState) {
+    public boolean canConnectTexturesToward(BlockAndLightGetter reader, BlockPos fromPos, BlockPos toPos, BlockState fromState) {
         BlockState toState = reader.getBlockState(toPos);
         Vec3i diff = toPos.subtract(fromPos);
         if (diff.equals(Vec3i.ZERO))
             return true;
-        Direction facing = Direction.fromDelta(diff.getX(), diff.getY(), diff.getZ());
+        Direction facing = com.copycatsplus.copycats.utility.DirectionUtils.fromDelta(diff.getX(), diff.getY(), diff.getZ());
         if (toState.getBlock() instanceof IronBarsBlock) {
             if (facing == null)
                 return false;
@@ -141,12 +138,12 @@ public class CopycatFlatPaneBlock extends CCWaterloggedCopycatBlock implements I
     }
 
     @Override
-    public Optional<Boolean> blockCTTowards(BlockAndTintGetter reader, BlockState state, BlockPos pos, BlockPos ctPos, BlockPos connectingPos, Direction face) {
+    public Optional<Boolean> blockCTTowards(BlockAndLightGetter reader, BlockState state, BlockPos pos, BlockPos ctPos, BlockPos connectingPos, Direction face) {
         return Optional.of(false);
     }
 
     @Override
-    public Optional<Boolean> isCTBlocked(BlockAndTintGetter reader, BlockState state, BlockPos pos, BlockPos connectingPos, BlockPos blockingPos, Direction face) {
+    public Optional<Boolean> isCTBlocked(BlockAndLightGetter reader, BlockState state, BlockPos pos, BlockPos connectingPos, BlockPos blockingPos, Direction face) {
         return Optional.of(false);
     }
 
@@ -162,7 +159,6 @@ public class CopycatFlatPaneBlock extends CCWaterloggedCopycatBlock implements I
         return ICopycatBlock.hidesNeighborFace(level, pos, state, neighborState, dir);
     }
 
-    @MethodsReturnNonnullByDefault
     private static class PlacementHelper implements IPlacementHelper {
         @Override
         public Predicate<ItemStack> getItemPredicate() {

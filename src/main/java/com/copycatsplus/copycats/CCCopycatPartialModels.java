@@ -9,7 +9,7 @@ import com.copycatsplus.copycats.content.copycat.cogwheel.CopycatLargeCogWheelMo
 import com.copycatsplus.copycats.foundation.copycat.model.kinetic.ICopycatPartialModel;
 import com.copycatsplus.copycats.content.copycat.shaft.CopycatShaftModelCore;
 import com.copycatsplus.copycats.foundation.copycat.model.kinetic.KineticCopycatRenderData;
-import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.Property;
 
@@ -42,11 +42,11 @@ public enum CCCopycatPartialModels implements ICopycatPartialModel {
         this.properties = blockStateProperties;
     }
 
-    private final BakedModel model;
+    private final BlockStateModel model;
     private final Property<?>[] properties;
 
     @Override
-    public BakedModel getModel() {
+    public BlockStateModel getModel() {
         return model;
     }
 

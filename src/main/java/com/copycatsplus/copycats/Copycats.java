@@ -1,24 +1,13 @@
 package com.copycatsplus.copycats;
 
 import com.copycatsplus.copycats.config.CCConfigs;
-import com.copycatsplus.copycats.datagen.recipes.CCStandardRecipes;
-import com.copycatsplus.copycats.foundation.tooltip.CopycatDescription;
 import com.copycatsplus.copycats.network.CCPackets;
-import com.copycatsplus.copycats.utility.TooltipUtils;
 import com.copycatsplus.copycats.port.create.foundation.data.CreateRegistrate;
-import com.zurrtum.create.client.foundation.item.ItemDescription;
-import com.zurrtum.create.client.foundation.item.KineticStats;
-import com.zurrtum.create.client.foundation.item.TooltipModifier;
-import com.zurrtum.create.client.catnip.lang.FontHelper;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.data.DataGenerator;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.CompletableFuture;
 
 public class Copycats {
     public static final String MODID = "copycats";
@@ -30,13 +19,10 @@ public class Copycats {
     public static final int DATA_FIXER_VERSION = 1;
     public static final Logger LOGGER = LoggerFactory.getLogger("Copycats+");
 
+    // PORT-NOTE(26.1): the tooltip modifier factory moved to CopycatsClient (Create Fly's tooltip classes are client
+    // only); datagen (gatherData) is stubbed, the committed generated resources are used.
     private static final CreateRegistrate REGISTRATE = CreateRegistrate.create(MODID)
-            .defaultCreativeTab((ResourceKey<CreativeModeTab>) null)
-            .setTooltipModifierFactory(item -> TooltipUtils.sequential(
-                    CopycatDescription.create(item),
-                    new ItemDescription.Modifier(item, FontHelper.Palette.STANDARD_CREATE),
-                    TooltipModifier.mapNull(KineticStats.create(item)))
-            );
+            .defaultCreativeTab((ResourceKey<CreativeModeTab>) null);
 
     public static void init() {
         CCBlocks.register();
@@ -49,15 +35,11 @@ public class Copycats {
         CCPackets.register();
     }
 
-    public static void gatherData(DataGenerator.PackGenerator gen, CompletableFuture<HolderLookup.Provider> lookupProvider) {
-        gen.addProvider(output -> new CCStandardRecipes(output, lookupProvider));
-    }
-
     public static CreateRegistrate getRegistrate() {
         return REGISTRATE;
     }
 
-    public static ResourceLocation asResource(String path) {
-        return ResourceLocation.fromNamespaceAndPath(MODID, path);
+    public static Identifier asResource(String path) {
+        return Identifier.fromNamespaceAndPath(MODID, path);
     }
 }

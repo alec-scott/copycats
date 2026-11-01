@@ -1,5 +1,7 @@
 package com.copycatsplus.copycats.foundation.tooltip;
 
+import net.minecraft.client.Minecraft;
+
 import com.zurrtum.create.client.foundation.item.TooltipHelper;
 import com.zurrtum.create.client.foundation.item.TooltipModifier;
 import com.zurrtum.create.client.foundation.utility.CreateLang;
@@ -88,7 +90,7 @@ public class CopycatDescription {
         }
         if (shortDescription == null || longDescription == null)
             loadDescriptions(item);
-        if (Screen.hasShiftDown()) {
+        if (Minecraft.getInstance().hasShiftDown()) {
             if (longDescription != null)
                 tooltip.addAll(1, longDescription);
         } else {

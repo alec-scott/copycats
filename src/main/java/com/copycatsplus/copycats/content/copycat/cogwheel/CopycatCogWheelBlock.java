@@ -9,7 +9,6 @@ import com.zurrtum.create.content.contraptions.StructureTransform;
 import com.zurrtum.create.content.decoration.bracket.BracketBlock;
 import com.zurrtum.create.content.kinetics.simpleRelays.CogWheelBlock;
 import com.zurrtum.create.content.kinetics.simpleRelays.ShaftBlock;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
@@ -17,13 +16,12 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.BlockAndLightGetter;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Mirror;
@@ -41,7 +39,6 @@ import java.util.Locale;
 import java.util.Set;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class CopycatCogWheelBlock extends CogWheelBlock implements IMultiStateCopycatBlock {
     protected CopycatCogWheelBlock(boolean large, Properties properties) {
         super(large, properties);
@@ -95,7 +92,7 @@ public class CopycatCogWheelBlock extends CogWheelBlock implements IMultiStateCo
     }
 
     @Override
-    public boolean canToggleCT(BlockState state, BlockAndTintGetter level, BlockPos pos) {
+    public boolean canToggleCT(BlockState state, BlockAndLightGetter level, BlockPos pos) {
         return false;
     }
 
@@ -124,7 +121,7 @@ public class CopycatCogWheelBlock extends CogWheelBlock implements IMultiStateCo
     }
 
     @Override
-    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+    public InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         return InteractionUtils.sequentialItem(
                 () -> IMultiStateCopycatBlock.super.useItemOn(stack, state, level, pos, player, hand, hitResult),
                 () -> super.useItemOn(stack, state, level, pos, player, hand, hitResult)
@@ -152,11 +149,6 @@ public class CopycatCogWheelBlock extends CogWheelBlock implements IMultiStateCo
     }
 
     @Override
-    public void onRemove(BlockState state, Level world, BlockPos pos, BlockState newState, boolean isMoving) {
-        IMultiStateCopycatBlock.super.onRemove(state, world, pos, newState, isMoving, super::onRemove);
-    }
-
-    @Override
     public BlockState playerWillDestroy(@NotNull Level level, @NotNull BlockPos pos, @NotNull BlockState state, @NotNull Player player) {
         super.playerWillDestroy(level, pos, state, player);
         IMultiStateCopycatBlock.super.playerWillDestroy(level, pos, state, player);
@@ -165,7 +157,7 @@ public class CopycatCogWheelBlock extends CogWheelBlock implements IMultiStateCo
 
     @Override
     public VoxelShape getPartialFaceShape(BlockGetter level, BlockState state, String property, Direction face) {
-        return state.getFaceOcclusionShape(level, BlockPos.ZERO, face);
+        return state.getFaceOcclusionShape(face);
     }
 
     @Override
@@ -174,16 +166,16 @@ public class CopycatCogWheelBlock extends CogWheelBlock implements IMultiStateCo
     }
 
     @Override
-    public boolean isIgnoredConnectivitySide(BlockAndTintGetter reader, BlockState state, Direction face, BlockPos fromPos, @Nullable BlockPos toPos, @Nullable BlockState toState) {
+    public boolean isIgnoredConnectivitySide(BlockAndLightGetter reader, BlockState state, Direction face, BlockPos fromPos, @Nullable BlockPos toPos, @Nullable BlockState toState) {
         return true;
     }
 
     @Override
-    public boolean canConnectTexturesToward(String property, BlockAndTintGetter reader, BlockPos fromPos, BlockPos toPos, BlockState state) {
+    public boolean canConnectTexturesToward(String property, BlockAndLightGetter reader, BlockPos fromPos, BlockPos toPos, BlockState state) {
         if (property.equals(Part.COGWHEEL.getSerializedName()))
             return false;
         Vec3i diff = toPos.subtract(fromPos);
-        Direction face = Direction.fromDelta(diff.getX(), diff.getY(), diff.getZ());
+        Direction face = com.copycatsplus.copycats.utility.DirectionUtils.fromDelta(diff.getX(), diff.getY(), diff.getZ());
         if (face == null) return false;
         return face.getAxis() == state.getValue(AXIS);
     }

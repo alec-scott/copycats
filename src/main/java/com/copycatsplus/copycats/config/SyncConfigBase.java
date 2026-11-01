@@ -43,7 +43,7 @@ public abstract class SyncConfigBase extends ConfigBase {
         if (children != null)
             for (ConfigBase child : children) {
                 if (child instanceof SyncConfigBase syncChild) {
-                    CompoundTag nbt = config.getCompound(child.getName());
+                    CompoundTag nbt = config.getCompoundOrEmpty(child.getName());
                     syncChild.readSyncConfig(nbt);
                 }
             }
@@ -71,7 +71,7 @@ public abstract class SyncConfigBase extends ConfigBase {
 
     public void syncToPlayer(ServerPlayer player) {
         if (player == null) return;
-        CCPackets.network().sendToClient(player, new ConfigSyncPacket(getSyncConfig(), type()));
+        CCPackets.sendToClient(player, new ConfigSyncPacket(getSyncConfig(), type()));
         Copycats.LOGGER.debug("Sync Config: Sending server config to {}", player.getName().getString());
     }
 }

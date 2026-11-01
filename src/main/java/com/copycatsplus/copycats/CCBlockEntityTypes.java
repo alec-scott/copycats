@@ -16,6 +16,7 @@ import com.copycatsplus.copycats.content.copycat.shaft.CopycatShaftVisual;
 import com.copycatsplus.copycats.content.copycat.shaft.CopycatShaftRenderer;
 import com.zurrtum.create.client.content.fluids.pipes.TransparentStraightPipeRenderer;
 import com.copycatsplus.copycats.port.create.foundation.data.CreateRegistrate;
+import com.copycatsplus.copycats.port.create.BETypeOverride;
 import com.copycatsplus.copycats.port.registrate.util.entry.BlockEntityEntry;
 
 public class CCBlockEntityTypes {
@@ -72,18 +73,17 @@ public class CCBlockEntityTypes {
 
     public static final BlockEntityEntry<? extends MultiStateCopycatBlockEntity> MULTI_STATE_COPYCAT_LADDER =
             REGISTRATE.blockEntity("multistate_ladder_copycat", MultiStateCopycatLadderBlockEntity::new)
-                    .validBlocks(/*CCBlocks.COPYCAT_LADDER*/)
-                    .register();
+                                        .register();
 
     public static final BlockEntityEntry<? extends CopycatShaftBlockEntity> COPYCAT_SHAFT =
-            REGISTRATE.blockEntity("copycat_shaft", CopycatShaftBlockEntity::new)
+            REGISTRATE.blockEntity("copycat_shaft", BETypeOverride.of(CopycatShaftBlockEntity::new))
                     .visual(() -> CopycatShaftVisual::new, false)
                     .validBlocks(CCBlocks.COPYCAT_SHAFT)
                     .renderer(() -> CopycatShaftRenderer::new)
                     .register();
 
     public static final BlockEntityEntry<? extends CopycatCogWheelBlockEntity> COPYCAT_COGWHEEL =
-            REGISTRATE.blockEntity("copycat_cogwheel", CopycatCogWheelBlockEntity::new)
+            REGISTRATE.blockEntity("copycat_cogwheel", BETypeOverride.of(CopycatCogWheelBlockEntity::new))
                     .visual(() -> CopycatCogWheelVisual::new, false)
                     .validBlocks(CCBlocks.COPYCAT_COGWHEEL, CCBlocks.COPYCAT_LARGE_COGWHEEL)
                     .renderer(() -> CopycatCogWheelRenderer::new)
@@ -96,13 +96,13 @@ public class CCBlockEntityTypes {
                     .register();
 
     public static final BlockEntityEntry<? extends CopycatStraightPipeBlockEntity> COPYCAT_GLASS_FLUID_PIPE =
-            REGISTRATE.blockEntity("copycat_glass_fluid_pipe", CopycatStraightPipeBlockEntity::new)
+            REGISTRATE.blockEntity("copycat_glass_fluid_pipe", BETypeOverride.of(CopycatStraightPipeBlockEntity::new))
                     .validBlocks(CCBlocks.COPYCAT_GLASS_FLUID_PIPE)
                     .renderer(() -> TransparentStraightPipeRenderer::new)
                     .register();
 
     public static final BlockEntityEntry<? extends CopycatSlidingDoorBlockEntity> COPYCAT_SLIDING_DOOR =
-            REGISTRATE.blockEntity("copycat_sliding_door", CopycatSlidingDoorBlockEntity::new)
+            REGISTRATE.blockEntity("copycat_sliding_door", BETypeOverride.of(CopycatSlidingDoorBlockEntity::new))
                     .validBlocks(CCBlocks.COPYCAT_SLIDING_DOOR, CCBlocks.COPYCAT_FOLDING_DOOR)
                     .renderer(() -> CopycatSlidingDoorRenderer::new)
                     .register();

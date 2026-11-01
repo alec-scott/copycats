@@ -1,5 +1,9 @@
 package com.copycatsplus.copycats.foundation.copycat;
 
+import net.minecraft.world.level.storage.ValueOutput;
+
+import net.minecraft.world.level.storage.ValueInput;
+
 import java.util.List;
 
 import com.zurrtum.create.content.schematics.requirement.ItemRequirement;
@@ -7,7 +11,6 @@ import com.zurrtum.create.foundation.blockEntity.SmartBlockEntity;
 import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
 
 import com.zurrtum.create.client.foundation.virtualWorld.VirtualRenderWorld;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderLookup;
@@ -29,7 +32,6 @@ import javax.annotation.ParametersAreNonnullByDefault;
  * against {@link ICopycatBlockEntity} instead.
  */
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class CCCopycatBlockEntity extends SmartBlockEntity implements ICopycatBlockEntity {
 
     protected BlockState material;
@@ -96,13 +98,7 @@ public class CCCopycatBlockEntity extends SmartBlockEntity implements ICopycatBl
     }
 
     @Override
-    public void onLoad() {
-        super.onLoad();
-        ICopycatBlockEntity.super.onLoad();
-    }
-
-    @Override
-    public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
+    public void addBehaviours(List<BlockEntityBehaviour<?>> behaviours) {
     }
 
     @Override
@@ -111,21 +107,26 @@ public class CCCopycatBlockEntity extends SmartBlockEntity implements ICopycatBl
     }
 
     @Override
-    public void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
-        super.read(tag, registries, clientPacket);
-        ICopycatBlockEntity.read(this, tag, registries, clientPacket);
+    public void read(ValueInput tag, boolean clientPacket) {
+        super.read(tag, clientPacket);
+        ICopycatBlockEntity.read(this, tag, clientPacket);
     }
 
     @Override
-    public void writeSafe(CompoundTag tag, HolderLookup.Provider registries) {
-        super.writeSafe(tag, registries);
-        ICopycatBlockEntity.writeSafe(this, tag, registries);
+    public void writeSafe(ValueOutput tag) {
+        super.writeSafe(tag);
+        ICopycatBlockEntity.writeSafe(this, tag);
     }
 
     @Override
-    public void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
-        super.write(tag, registries, clientPacket);
-        ICopycatBlockEntity.write(this, tag, registries, clientPacket);
+    public void write(ValueOutput tag, boolean clientPacket) {
+        super.write(tag, clientPacket);
+        ICopycatBlockEntity.write(this, tag, clientPacket);
+    }
+
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState oldState) {
+        super.preRemoveSideEffects(pos, oldState);
+        ICopycatBlockEntity.dropConsumedItems(this, pos);
     }
 }
-

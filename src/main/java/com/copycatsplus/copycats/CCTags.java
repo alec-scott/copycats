@@ -3,7 +3,7 @@ package com.copycatsplus.copycats;
 import com.copycatsplus.copycats.utility.Platform;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -13,12 +13,12 @@ import net.minecraft.world.level.material.Fluid;
 import static com.copycatsplus.copycats.CCTags.NameSpace.MOD;
 
 public class CCTags {
-    public static <T> TagKey<T> optionalTag(Registry<T> registry, ResourceLocation id) {
+    public static <T> TagKey<T> optionalTag(Registry<T> registry, Identifier id) {
         return TagKey.create(registry.key(), id);
     }
 
     public static <T> TagKey<T> commonTag(Registry<T> registry, String path) {
-        return optionalTag(registry, ResourceLocation.fromNamespaceAndPath("c", path));
+        return optionalTag(registry, Identifier.fromNamespaceAndPath("c", path));
     }
 
     public static TagKey<Block> commonBlockTag(String path) {
@@ -87,7 +87,7 @@ public class CCTags {
         }
 
         Items(NameSpace namespace, String path, boolean optional, boolean alwaysDatagen) {
-            ResourceLocation id = ResourceLocation.fromNamespaceAndPath(namespace.id, path == null ? CCLang.asId(name()) : path);
+            Identifier id = Identifier.fromNamespaceAndPath(namespace.id, path == null ? CCLang.asId(name()) : path);
             if (optional) {
                 tag = optionalTag(BuiltInRegistries.ITEM, id);
             } else {

@@ -20,12 +20,8 @@ import static com.copycatsplus.copycats.content.copycat.board.CopycatBoardBlock.
 public class CopycatBoxItem extends BlockItem {
 
     public CopycatBoxItem(Properties builder) {
-        super(CCBlocks.COPYCAT_BOARD.get(), builder);
-    }
-
-    @Override
-    public @NotNull String getDescriptionId() {
-        return "item.copycats.copycat_box";
+        // PORT-NOTE(26.1): getDescriptionId is final; the item id prefix gives item.copycats.<id> as before
+        super(CCBlocks.COPYCAT_BOARD.get(), builder.useItemDescriptionPrefix());
     }
 
     @Override

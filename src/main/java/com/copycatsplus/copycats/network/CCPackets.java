@@ -1,51 +1,45 @@
 package com.copycatsplus.copycats.network;
 
 import com.copycatsplus.copycats.Copycats;
-import net.createmod.catnip.net.base.BasePacketPayload;
-import net.createmod.catnip.net.base.CatnipPacketRegistry;
-import net.createmod.catnip.platform.CatnipServices;
-import net.createmod.catnip.platform.services.NetworkHelper;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 
-import java.util.Locale;
-
-public enum CCPackets implements BasePacketPayload.PacketTypeProvider {
-    CONFIG_SYNC(ConfigSyncPacket.class, ConfigSyncPacket.STREAM_CODEC),
-    FILL_COPYCAT(FillCopycatPacket.class, FillCopycatPacket.STREAM_CODEC)
-    ;
-/*    //TODO: Increase version on updates
-    public static final PacketSystem;PACKETS = PacketSystem.builder(Copycats.MODID, 2)
-            .s2c(ConfigSyncPacket.class, ConfigSyncPacket::new)
-            .c2s(FillCopycatPacket.class, FillCopycatPacket::new)
-            .build();*/
-
-    private final CatnipPacketRegistry.PacketType<?> type;
-
-    <T extends BasePacketPayload> CCPackets(Class<T> clazz, StreamCodec<? super RegistryFriendlyByteBuf, T> codec) {
-        String name = this.name().toLowerCase(Locale.ROOT);
-        this.type = new CatnipPacketRegistry.PacketType<>(
-                new CustomPacketPayload.Type<>(Copycats.asResource(name)),
-                clazz, codec
-        );
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T extends CustomPacketPayload> CustomPacketPayload.Type<T> getType() {
-        return (CustomPacketPayload.Type<T>) this.type.type();
-    }
-
-    public static NetworkHelper network() {
-        return CatnipServices.NETWORK;
-    }
+/**
+ * PORT-NOTE(26.1): Catnip's packet registry is NeoForge only; Copycats+' two packets are plain Fabric payloads.
+ */
+public class CCPackets {
+    public static final CustomPacketPayload.Type<ConfigSyncPacket> CONFIG_SYNC = new CustomPacketPayload.Type<>(Copycats.asResource("config_sync"));
+    public static final CustomPacketPayload.Type<FillCopycatPacket> FILL_COPYCAT = new CustomPacketPayload.Type<>(Copycats.asResource("fill_copycat"));
 
     public static void register() {
-        CatnipPacketRegistry packetRegistry = new CatnipPacketRegistry(Copycats.MODID, 3);
-        for (CCPackets packet : CCPackets.values()) {
-            packetRegistry.registerPacket(packet.type);
-        }
-        packetRegistry.registerAllPackets();
+        PayloadTypeRegistry.clientboundPlay().register(CONFIG_SYNC, ConfigSyncPacket.STREAM_CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(FILL_COPYCAT, FillCopycatPacket.STREAM_CODEC);
+        ServerPlayNetworking.registerGlobalReceiver(FILL_COPYCAT, (packet, context) -> packet.handle(context.player()));
+    }
+
+    @Environment(EnvType.CLIENT)
+    public static void registerClient() {
+        ClientPlayNetworking.registerGlobalReceiver(CONFIG_SYNC, (packet, context) -> packet.handle(context.player()));
+    }
+
+    public static void sendToClient(ServerPlayer player, CustomPacketPayload packet) {
+        ServerPlayNetworking.send(player, packet);
+    }
+
+    public static void sendToAllClients(MinecraftServer server, CustomPacketPayload packet) {
+        for (ServerPlayer player : PlayerLookup.all(server))
+            ServerPlayNetworking.send(player, packet);
+    }
+
+    @Environment(EnvType.CLIENT)
+    public static void sendToServer(CustomPacketPayload packet) {
+        ClientPlayNetworking.send(packet);
     }
 }

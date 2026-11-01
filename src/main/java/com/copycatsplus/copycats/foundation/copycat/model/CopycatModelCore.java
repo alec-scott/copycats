@@ -6,7 +6,8 @@ import com.copycatsplus.copycats.foundation.copycat.model.assembly.CopycatRender
 import com.copycatsplus.copycats.foundation.copycat.multistate.IMultiStateCopycatBlock;
 import com.copycatsplus.copycats.utility.BlockUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel.UnbakedRoot;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 
@@ -112,10 +113,8 @@ public abstract class CopycatModelCore implements CopycatModelPart {
      * @param state The block state to get the model of.
      * @return The baked model of the block state.
      */
-    public static BakedModel getModelOf(BlockState state) {
-        return Minecraft.getInstance()
-                .getBlockRenderer()
-                .getBlockModel(state);
+    public static BlockStateModel getModelOf(BlockState state) {
+        return Minecraft.getInstance().getModelManager().getBlockStateModelSet().get(state);
     }
 
     /**
@@ -134,19 +133,19 @@ public abstract class CopycatModelCore implements CopycatModelPart {
     }
 
     /**
-     * Create a platform-specific {@link BakedModel} implementation for a copycat which wraps the original model and
+     * Create a platform-specific {@link BlockStateModel} implementation for a copycat which wraps the original model and
      * renders with the provided core.
      *
      * @param original The original model to wrap.
      * @param core     The core to render the model with.
      */
     @NotNull
-    public static BakedModel createModel(BakedModel original, CopycatModelCore core) {
-        return com.copycatsplus.copycats.foundation.copycat.model.fabric.CopycatModelCoreImpl.createModel(original, core);
+    public static UnbakedRoot createModel(BlockState state, UnbakedRoot original, CopycatModelCore core) {
+        return com.copycatsplus.copycats.foundation.copycat.model.fabric.CopycatModelCoreImpl.createModel(state, original, core);
     }
 
     /**
-     * Create a platform-specific {@link BakedModel} implementation for a copycat which wraps the original model and
+     * Create a platform-specific {@link BlockStateModel} implementation for a copycat which wraps the original model and
      * renders with the provided core.
      * <p>
      * The model is configured for kinetic rendering by disabling ambient occlusion and applying a model filter
@@ -156,8 +155,8 @@ public abstract class CopycatModelCore implements CopycatModelPart {
      * @param core     The core to render the model with.
      */
     @NotNull
-    public static BakedModel createKineticModel(BakedModel original, CopycatModelCore core) {
-        return com.copycatsplus.copycats.foundation.copycat.model.fabric.CopycatModelCoreImpl.createKineticModel(original, core);
+    public static UnbakedRoot createKineticModel(BlockState state, UnbakedRoot original, CopycatModelCore core) {
+        return com.copycatsplus.copycats.foundation.copycat.model.fabric.CopycatModelCoreImpl.createKineticModel(state, original, core);
     }
 
     /**
@@ -209,7 +208,7 @@ public abstract class CopycatModelCore implements CopycatModelPart {
      * A model entry to be rendered by a {@link CopycatModelCore}.
      *
      * @param key            A custom key to identify the model entry during rendering.
-     * @param model          A getter that returns a {@link BakedModel} to be rendered for this entry, invoked for each render. Set to null to render the original model as specified by the copycat's block state file.
+     * @param model          A getter that returns a {@link BlockStateModel} to be rendered for this entry, invoked for each render. Set to null to render the original model as specified by the copycat's block state file.
      * @param part           A {@link CopycatModelPart} to assemble the model quads with. Set to null if the model should be renderekd without modifications.
      * @param materialMapper A function to modify the block state of the material at render time. Use {@link MaterialMapper#IDENTITY} if no modifications are needed.
      * @param type           The type of the model entry, which determines how the model is rendered.
@@ -265,7 +264,7 @@ public abstract class CopycatModelCore implements CopycatModelPart {
     }
 
     /**
-     * A functional interface to get the {@link BakedModel} when rendering a {@link ModelEntry}. For model cores with
+     * A functional interface to get the {@link BlockStateModel} when rendering a {@link ModelEntry}. For model cores with
      * extra data, the data should be set before invoking this getter, so that the getter is safe to access the data.
      */
     @FunctionalInterface
@@ -278,7 +277,7 @@ public abstract class CopycatModelCore implements CopycatModelPart {
          * @param state    The block state of the copycat.
          * @param material The block state of the copied material.
          */
-        BakedModel getModel(BlockState state, BlockState material);
+        BlockStateModel getModel(BlockState state, BlockState material);
     }
 
     /**

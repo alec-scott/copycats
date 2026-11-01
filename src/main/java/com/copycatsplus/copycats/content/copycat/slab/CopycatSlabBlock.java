@@ -18,7 +18,6 @@ import com.zurrtum.create.content.schematics.requirement.ItemRequirement;
 import com.zurrtum.create.catnip.placement.IPlacementHelper;
 import com.zurrtum.create.catnip.placement.PlacementHelpers;
 import com.zurrtum.create.catnip.placement.PlacementOffset;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
@@ -27,7 +26,6 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -55,7 +53,6 @@ import java.util.*;
 import java.util.function.Predicate;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class CopycatSlabBlock extends WaterloggedMultiStateCopycatBlock implements SpecialBlockItemRequirement {
 
     public static final EnumProperty<Axis> AXIS = BlockStateProperties.AXIS;
@@ -137,7 +134,7 @@ public class CopycatSlabBlock extends WaterloggedMultiStateCopycatBlock implemen
     }
 
     @Override
-    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+    public InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         return InteractionUtils.sequentialItem(
                 () -> InteractionUtils.usePlacementHelper(placementHelperId, stack, state, level, pos, player, hand, hitResult),
                 () -> super.useItemOn(stack, state, level, pos, player, hand, hitResult)
@@ -164,7 +161,7 @@ public class CopycatSlabBlock extends WaterloggedMultiStateCopycatBlock implemen
                 }
             }
             BlockPos up = pos.relative(Direction.UP);
-            world.setBlockAndUpdate(pos, state.setValue(SLAB_TYPE, property.equals(SlabType.BOTTOM.getSerializedName()) ? SlabType.TOP : SlabType.BOTTOM).updateShape(Direction.UP, world.getBlockState(up), world, pos, up));
+            world.setBlockAndUpdate(pos, state.setValue(SLAB_TYPE, property.equals(SlabType.BOTTOM.getSerializedName()) ? SlabType.TOP : SlabType.BOTTOM).updateShape(world, world, pos, Direction.UP, up, world.getBlockState(up), world.getRandom()));
             IWrenchable.playRemoveSound(world, pos);
         }
         return InteractionResult.SUCCESS;
@@ -276,7 +273,7 @@ public class CopycatSlabBlock extends WaterloggedMultiStateCopycatBlock implemen
     public static CopycatTransformableState<Void> toTransformableState(BlockState state) {
         return CopycatTransformableState.create(t -> {
             Direction facing = getApparentDirection(state);
-            Vec3i normal = facing.getNormal();
+            Vec3i normal = facing.getUnitVec3i();
             Vec3i part = new Vec3i(normal.getX() == 0 ? 8 : normal.getX() > 0 ? 16 : 0,
                     normal.getY() == 0 ? 8 : normal.getY() > 0 ? 16 : 0,
                     normal.getZ() == 0 ? 8 : normal.getZ() > 0 ? 16 : 0);
@@ -291,7 +288,7 @@ public class CopycatSlabBlock extends WaterloggedMultiStateCopycatBlock implemen
     public static CopycatTransformableState<MaterialItemStorage.MaterialItem> toTransformableStorage(BlockState state, IMultiStateCopycatBlockEntity be) {
         return CopycatTransformableState.create(t -> {
             Direction facing = getApparentDirection(state);
-            Vec3i normal = facing.getNormal();
+            Vec3i normal = facing.getUnitVec3i();
             Vec3i part = new Vec3i(normal.getX() == 0 ? 8 : normal.getX() > 0 ? 16 : 0,
                     normal.getY() == 0 ? 8 : normal.getY() > 0 ? 16 : 0,
                     normal.getZ() == 0 ? 8 : normal.getZ() > 0 ? 16 : 0);
@@ -334,7 +331,7 @@ public class CopycatSlabBlock extends WaterloggedMultiStateCopycatBlock implemen
     public static void fromTransformableStorage(BlockState state, IMultiStateCopycatBlockEntity be, CopycatTransformableState<MaterialItemStorage.MaterialItem> transformableState) {
         // We need to clean the storage before assigning the transformed data back
         for (String property : be.getMaterialItemStorage().getAllProperties()) {
-            be.getMaterialItemStorage().storeMaterialItem(property, new MaterialItemStorage.MaterialItem(AllBlocks.COPYCAT_BASE.getDefaultState(), ItemStack.EMPTY));
+            be.getMaterialItemStorage().storeMaterialItem(property, new MaterialItemStorage.MaterialItem(AllBlocks.COPYCAT_BASE.defaultBlockState(), ItemStack.EMPTY));
         }
 
         for (CopycatTransformableState.Part<MaterialItemStorage.MaterialItem> part : transformableState.parts) {
@@ -416,7 +413,6 @@ public class CopycatSlabBlock extends WaterloggedMultiStateCopycatBlock implemen
         }
     }
 
-    @MethodsReturnNonnullByDefault
     private static class PlacementHelper implements IPlacementHelper {
         @Override
         public Predicate<ItemStack> getItemPredicate() {

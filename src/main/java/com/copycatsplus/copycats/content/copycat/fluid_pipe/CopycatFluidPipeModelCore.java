@@ -6,7 +6,7 @@ import com.copycatsplus.copycats.foundation.copycat.model.assembly.AssemblyTrans
 import com.zurrtum.create.content.fluids.FluidTransportBehaviour;
 import com.zurrtum.create.catnip.data.Iterate;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.world.level.block.PipeBlock;
@@ -480,7 +480,7 @@ public class CopycatFluidPipeModelCore extends CopycatModelCore.WithData<Copycat
     public static class PipeModelData {
         private final FluidTransportBehaviour.AttachmentTypes[] attachments = new FluidTransportBehaviour.AttachmentTypes[6];
         private boolean encased;
-        private BakedModel bracket;
+        private BlockStateModel bracket;
 
         public PipeModelData() {
             Arrays.fill(this.attachments, FluidTransportBehaviour.AttachmentTypes.NONE);
@@ -488,11 +488,11 @@ public class CopycatFluidPipeModelCore extends CopycatModelCore.WithData<Copycat
 
         public void putBracket(BlockState state) {
             if (state != null) {
-                this.bracket = Minecraft.getInstance().getBlockRenderer().getBlockModel(state);
+                this.bracket = com.copycatsplus.copycats.foundation.copycat.model.CopycatModelCore.getModelOf(state);
             }
         }
 
-        public BakedModel getBracket() {
+        public BlockStateModel getBracket() {
             return this.bracket;
         }
 

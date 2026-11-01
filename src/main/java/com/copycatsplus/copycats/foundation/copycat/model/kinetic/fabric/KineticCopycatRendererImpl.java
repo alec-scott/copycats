@@ -2,55 +2,34 @@ package com.copycatsplus.copycats.foundation.copycat.model.kinetic.fabric;
 
 import com.copycatsplus.copycats.foundation.copycat.ICopycatBlockEntity;
 import com.copycatsplus.copycats.foundation.copycat.model.kinetic.WrappedRenderWorld;
-import com.copycatsplus.copycats.utility.fabric.ModelDataUtils;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.zurrtum.create.client.flywheel.api.material.CardinalLightingMode;
-import com.zurrtum.create.client.flywheel.api.model.Model;
-import com.zurrtum.create.client.flywheel.lib.material.LightShaders;
-import com.zurrtum.create.client.flywheel.lib.material.SimpleMaterial;
-import com.zurrtum.create.client.flywheel.lib.model.ModelUtil;
-import com.zurrtum.create.client.flywheel.lib.model.baked.BakedModelBuilder;
+import com.zurrtum.create.client.catnip.render.EntityBlockSbbBuilder;
 import com.zurrtum.create.client.catnip.render.SuperByteBuffer;
-import net.createmod.ponder.render.VirtualRenderHelper;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.world.level.BlockAndTintGetter;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.neoforge.client.model.data.ModelData;
+import com.zurrtum.create.client.flywheel.api.model.Model;
+import com.zurrtum.create.client.flywheel.lib.model.baked.BakedModelBuilder;
+import com.zurrtum.create.client.flywheel.lib.model.baked.ModelRenderHelper;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
 
-
+/**
+ * PORT-NOTE(26.1): the copycat model reads the block entity from the {@link WrappedRenderWorld}, so the buffers are
+ * tesselated with it directly (NeoForge passed the materials through model data).
+ */
 public class KineticCopycatRendererImpl {
 
-    private static ModelData prepareModelData(BlockAndTintGetter renderWorld, BakedModel model, ICopycatBlockEntity be) {
-        ModelData blockEntityData = ModelDataUtils.mergeData(
-                ((BlockEntity) be).getModelData(),
-                VirtualRenderHelper.VIRTUAL_DATA
-        ).build();
-        ModelData renderData = model.getModelData(renderWorld, be.getBlockPos(), be.getBlockState(), blockEntityData);
-        ModelData.Builder builder = ModelData.builder();
-        ModelDataUtils.copyModelData(renderData, builder);
-        builder.with(VirtualRenderHelper.VIRTUAL_PROPERTY, true);
+    public static SuperByteBuffer renderBuffer(BlockStateModel model, ICopycatBlockEntity be, PoseStack ms) {
+        WrappedRenderWorld renderWorld = new WrappedRenderWorld(be);
+        BlockPos pos = be.getBlockPos();
+        BlockState state = be.getBlockState();
+        EntityBlockSbbBuilder builder = new EntityBlockSbbBuilder();
+        ModelRenderHelper.getHelper(builder).tesselateBlock(0, 0, 0, renderWorld, pos, state, model, state.getSeed(pos));
         return builder.build();
     }
 
-    public static SuperByteBuffer renderBuffer(BakedModel model, ICopycatBlockEntity be, PoseStack ms) {
-        WrappedRenderWorld renderWorld = new WrappedRenderWorld(be);
-        ModelData data = prepareModelData(renderWorld, model, be);
-
-        return new BakedModelWithDataBuilder(model)
-                .withRenderWorld(renderWorld)
-                .withRenderPos(be.getBlockPos())
-                .withReferenceState(be.getBlockState())
-                .withPoseStack(ms)
-                .withData(data)
-                .build();
-    }
-
-    public static Model instancedModel(BakedModel model, ICopycatBlockEntity be) {
-        WrappedRenderWorld renderWorld = new WrappedRenderWorld(be);
-        ModelData data = prepareModelData(renderWorld, model, be);
-
+    public static Model instancedModel(BlockStateModel model, ICopycatBlockEntity be) {
         return new BakedModelBuilder(model)
-                .level(renderWorld.withModelData(data))
+                .level(new WrappedRenderWorld(be))
                 .pos(be.getBlockPos())
                 .build();
     }

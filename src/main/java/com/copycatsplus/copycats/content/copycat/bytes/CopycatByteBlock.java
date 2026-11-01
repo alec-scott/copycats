@@ -15,7 +15,6 @@ import com.zurrtum.create.content.contraptions.StructureTransform;
 import com.zurrtum.create.content.equipment.wrench.IWrenchable;
 import com.zurrtum.create.content.schematics.requirement.ItemRequirement;
 import com.zurrtum.create.catnip.data.Iterate;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
@@ -47,7 +46,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class CopycatByteBlock extends WaterloggedMultiStateCopycatBlock implements SpecialBlockItemRequirement {
     public static BooleanProperty TOP_NE = BooleanProperty.create("top_northeast");
     public static BooleanProperty TOP_NW = BooleanProperty.create("top_northwest");
@@ -57,7 +55,7 @@ public class CopycatByteBlock extends WaterloggedMultiStateCopycatBlock implemen
     public static BooleanProperty BOTTOM_NW = BooleanProperty.create("bottom_northwest");
     public static BooleanProperty BOTTOM_SE = BooleanProperty.create("bottom_southeast");
     public static BooleanProperty BOTTOM_SW = BooleanProperty.create("bottom_southwest");
-    private final ImmutableMap<BlockState, VoxelShape> shapesCache;
+    private final java.util.function.Function<BlockState, VoxelShape> shapesCache;
     private final ImmutableMap<FaceData, VoxelShape> partialFaceCache;
 
     public static record FaceData(String property, Direction direction) {
@@ -175,7 +173,7 @@ public class CopycatByteBlock extends WaterloggedMultiStateCopycatBlock implemen
     @SuppressWarnings("deprecation")
     @Override
     public @NotNull VoxelShape getShape(@NotNull BlockState pState, @NotNull BlockGetter pLevel, @NotNull BlockPos pPos, @NotNull CollisionContext pContext) {
-        return Objects.requireNonNull(this.shapesCache.get(pState));
+        return Objects.requireNonNull(this.shapesCache.apply(pState));
     }
 
     @Override
@@ -202,7 +200,7 @@ public class CopycatByteBlock extends WaterloggedMultiStateCopycatBlock implemen
         if (stateForPlacement == null) return null;
         BlockPos blockPos = context.getClickedPos();
         BlockState state = context.getLevel().getBlockState(blockPos);
-        Vec3 bias = Vec3.atLowerCornerOf(context.getClickedFace().getNormal()).scale(1 / 16f);
+        Vec3 bias = Vec3.atLowerCornerOf(context.getClickedFace().getUnitVec3i()).scale(1 / 16f);
         Vec3 biasedLocation = context.getClickLocation().add(bias);
         if (!BlockPos.containing(biasedLocation).equals(context.getClickedPos())) {
             biasedLocation = MathUtils.clampToGrid(biasedLocation, context.getClickedPos());
@@ -230,7 +228,7 @@ public class CopycatByteBlock extends WaterloggedMultiStateCopycatBlock implemen
     public boolean canBeReplaced(@NotNull BlockState pState, BlockPlaceContext pUseContext) {
         ItemStack itemstack = pUseContext.getItemInHand();
         if (!itemstack.is(this.asItem())) return false;
-        Vec3 bias = Vec3.atLowerCornerOf(pUseContext.getClickedFace().getNormal()).scale(1 / 16f);
+        Vec3 bias = Vec3.atLowerCornerOf(pUseContext.getClickedFace().getUnitVec3i()).scale(1 / 16f);
         Vec3 biasedLocation = pUseContext.getClickLocation().add(bias);
         if (!BlockPos.containing(biasedLocation).equals(pUseContext.getClickedPos())) {
             biasedLocation = MathUtils.clampToGrid(biasedLocation, pUseContext.getClickedPos());
@@ -251,7 +249,7 @@ public class CopycatByteBlock extends WaterloggedMultiStateCopycatBlock implemen
         Level world = context.getLevel();
         BlockPos pos = context.getClickedPos();
         Player player = context.getPlayer();
-        Vec3 bias = Vec3.atLowerCornerOf(context.getClickedFace().getNormal()).scale(-1 / 16f);
+        Vec3 bias = Vec3.atLowerCornerOf(context.getClickedFace().getUnitVec3i()).scale(-1 / 16f);
         Byte bite = getByteFromVec(context.getClickLocation().add(bias), context.getClickedPos());
         if (world instanceof ServerLevel) {
             if (player != null) {
@@ -263,7 +261,7 @@ public class CopycatByteBlock extends WaterloggedMultiStateCopycatBlock implemen
                 }
             }
             BlockPos up = pos.relative(Direction.UP);
-            world.setBlockAndUpdate(pos, state.setValue(byByte(bite), false).updateShape(Direction.UP, world.getBlockState(up), world, pos, up));
+            world.setBlockAndUpdate(pos, state.setValue(byByte(bite), false).updateShape(world, world, pos, Direction.UP, up, world.getBlockState(up), world.getRandom()));
             IWrenchable.playRemoveSound(world, pos);
         }
         return InteractionResult.SUCCESS;

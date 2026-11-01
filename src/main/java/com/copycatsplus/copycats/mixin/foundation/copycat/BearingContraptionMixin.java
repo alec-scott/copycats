@@ -4,7 +4,8 @@ import com.copycatsplus.copycats.foundation.copycat.ICopycatBlock;
 import com.copycatsplus.copycats.foundation.copycat.ICopycatBlockEntity;
 import com.copycatsplus.copycats.foundation.copycat.multistate.IMultiStateCopycatBlock;
 import com.copycatsplus.copycats.foundation.copycat.multistate.IMultiStateCopycatBlockEntity;
-import com.simibubi.create.AllTags;
+import com.zurrtum.create.AllBlockTags;
+import com.zurrtum.create.AllItemTags;
 import com.zurrtum.create.content.contraptions.bearing.BearingContraption;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -29,7 +30,7 @@ public class BearingContraptionMixin {
         BlockState state = capture.getKey().state();
         if (state.getBlock() instanceof IMultiStateCopycatBlock && capture.getRight() instanceof IMultiStateCopycatBlockEntity copycatBE) {
             for (BlockState material : copycatBE.getMaterialItemStorage().getAllMaterials()) {
-                if (AllTags.AllBlockTags.WINDMILL_SAILS.matches(material)) {
+                if (material.is(AllBlockTags.WINDMILL_SAILS)) {
                     cir.setReturnValue(material);
                     return;
                 }

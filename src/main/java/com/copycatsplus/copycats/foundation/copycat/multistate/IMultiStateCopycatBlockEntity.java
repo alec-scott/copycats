@@ -7,14 +7,14 @@ import com.zurrtum.create.content.contraptions.StructureTransform;
 import com.zurrtum.create.content.redstone.RoseQuartzLampBlock;
 import com.zurrtum.create.content.schematics.requirement.ItemRequirement;
 import com.zurrtum.create.catnip.data.Iterate;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Vec3i;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.BlockAndLightGetter;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.TrapDoorBlock;
@@ -45,7 +45,6 @@ import java.util.Set;
  * the implementation of copycats.
  */
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public interface IMultiStateCopycatBlockEntity extends ICopycatBlockEntity {
     MaterialItemStorage getMaterialItemStorage();
 
@@ -137,7 +136,7 @@ public interface IMultiStateCopycatBlockEntity extends ICopycatBlockEntity {
 
             @Override
             public VoxelShape getPartialFaceShape(BlockGetter level, BlockState state, String property, Direction face) {
-                return state.getFaceOcclusionShape(level, BlockPos.ZERO, face);
+                return state.getFaceOcclusionShape(face);
             }
 
             @Override
@@ -146,12 +145,12 @@ public interface IMultiStateCopycatBlockEntity extends ICopycatBlockEntity {
             }
 
             @Override
-            public boolean isIgnoredConnectivitySide(BlockAndTintGetter reader, BlockState state, Direction face, BlockPos fromPos, @Nullable BlockPos toPos, @Nullable BlockState toState) {
+            public boolean isIgnoredConnectivitySide(BlockAndLightGetter reader, BlockState state, Direction face, BlockPos fromPos, @Nullable BlockPos toPos, @Nullable BlockState toState) {
                 return true;
             }
 
             @Override
-            public boolean canConnectTexturesToward(String property, BlockAndTintGetter reader, BlockPos fromPos, BlockPos toPos, BlockState state) {
+            public boolean canConnectTexturesToward(String property, BlockAndLightGetter reader, BlockPos fromPos, BlockPos toPos, BlockState state) {
                 return false;
             }
         };
@@ -159,7 +158,7 @@ public interface IMultiStateCopycatBlockEntity extends ICopycatBlockEntity {
 
     @Override
     default boolean hasCustomMaterial() {
-        return !getMaterialItemStorage().getAllMaterials().stream().allMatch(state -> state.is(AllBlocks.COPYCAT_BASE.get()));
+        return !getMaterialItemStorage().getAllMaterials().stream().allMatch(state -> state.is(AllBlocks.COPYCAT_BASE));
     }
 
     default void setMaterial(String property, BlockState blockState) {
@@ -240,21 +239,29 @@ public interface IMultiStateCopycatBlockEntity extends ICopycatBlockEntity {
         notifyUpdate();
     }
 
-    static void read(IMultiStateCopycatBlockEntity self, CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
+    /**
+     * Drop the consumed items when the block entity is removed (call from preRemoveSideEffects).
+     */
+    static void dropConsumedItems(IMultiStateCopycatBlockEntity self, BlockPos pos) {
+        if (self.getLevel() != null)
+            self.getMaterialItemStorage().getAllConsumedItems().forEach(stack -> net.minecraft.world.level.block.Block.popResource(self.getLevel(), pos, stack));
+    }
+
+    static void read(IMultiStateCopycatBlockEntity self, ValueInput view, boolean clientPacket) {
         if (self.getBlockState().getBlock() instanceof IMultiStateCopycatBlock) {
-            boolean anyUpdated = self.getMaterialItemStorage().deserialize(tag.getCompound("material_data"), registries);
+            boolean anyUpdated = self.getMaterialItemStorage().read(view, "material_data");
 
             if (anyUpdated)
                 BlockEntityUtils.redraw((BlockEntity) self); // not calling self.redraw() because Extended Cogwheels overwrites it to be protected
         }
     }
 
-    static void writeSafe(IMultiStateCopycatBlockEntity self, CompoundTag tag, HolderLookup.Provider registries) {
-        BlockEntityUtils.saveMetadata((BlockEntity) self, tag);
-        tag.put("material_data", self.getMaterialItemStorage().serializeSafe(registries));
+    static void writeSafe(IMultiStateCopycatBlockEntity self, ValueOutput view) {
+        BlockEntityUtils.saveMetadata((BlockEntity) self, view);
+        self.getMaterialItemStorage().writeSafe(view, "material_data");
     }
 
-    static void write(IMultiStateCopycatBlockEntity self, CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
-        tag.put("material_data", self.getMaterialItemStorage().serialize(registries));
+    static void write(IMultiStateCopycatBlockEntity self, ValueOutput view, boolean clientPacket) {
+        self.getMaterialItemStorage().write(view, "material_data");
     }
 }

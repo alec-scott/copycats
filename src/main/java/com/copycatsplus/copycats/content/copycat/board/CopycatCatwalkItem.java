@@ -18,12 +18,8 @@ import java.util.Map;
 public class CopycatCatwalkItem extends BlockItem {
 
     public CopycatCatwalkItem(Properties builder) {
-        super(CCBlocks.COPYCAT_BOARD.get(), builder);
-    }
-
-    @Override
-    public @NotNull String getDescriptionId() {
-        return "item.copycats.copycat_catwalk";
+        // PORT-NOTE(26.1): getDescriptionId is final; the item id prefix gives item.copycats.<id> as before
+        super(CCBlocks.COPYCAT_BOARD.get(), builder.useItemDescriptionPrefix());
     }
 
     @Override

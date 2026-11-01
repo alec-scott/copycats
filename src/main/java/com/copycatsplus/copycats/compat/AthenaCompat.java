@@ -1,9 +1,8 @@
 package com.copycatsplus.copycats.compat;
 
-import net.minecraft.world.level.BlockAndTintGetter;
-
 public class AthenaCompat {
-    public static BlockAndTintGetter unwrapAthenaGetter(BlockAndTintGetter getter) {
-        return com.copycatsplus.copycats.compat.fabric.AthenaCompatImpl.unwrapAthenaGetter(getter);
+    // PORT-NOTE(26.1): Athena has no 26.1 Fabric build; nothing to unwrap
+    public static <T> T unwrapAthenaGetter(T getter) {
+        return getter;
     }
 }

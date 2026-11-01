@@ -20,7 +20,10 @@ public class ClientLevelMixin {
     private void destroyEffectForCopycats(BlockPos pos, BlockState state, CallbackInfo ci) {
         if (state.getBlock() instanceof ICopycatBlock) {
             ClientLevel level = (ClientLevel) (Object) this;
-            Minecraft.getInstance().particleEngine.destroy(pos, ICopycatBlock.getMaterial(level, pos));
+            BlockState material = ICopycatBlock.getMaterial(level, pos);
+            if (material.isAir() || material.getBlock() instanceof ICopycatBlock)
+                return;
+            level.addDestroyBlockEffect(pos, material);
             ci.cancel();
         }
     }
