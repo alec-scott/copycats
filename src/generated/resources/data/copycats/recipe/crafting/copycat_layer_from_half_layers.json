@@ -1,23 +1,19 @@
 {
-  "neoforge:conditions": [
+  "category": "misc",
+  "fabric:load_conditions": [
     {
-      "type": "copycats:feature_enabled",
-      "feature": "copycats:copycat_half_layer",
-      "invert": false
+      "condition": "copycats:feature_enabled",
+      "feature": "copycats:copycat_half_layer"
     }
   ],
-  "type": "minecraft:crafting_shaped",
-  "category": "misc",
   "key": {
-    "s": {
-      "item": "copycats:copycat_half_layer"
-    }
+    "s": "copycats:copycat_half_layer"
   },
   "pattern": [
     "ss"
   ],
   "result": {
-    "count": 1,
     "id": "copycats:copycat_layer"
-  }
+  },
+  "type": "minecraft:crafting_shaped"
 }

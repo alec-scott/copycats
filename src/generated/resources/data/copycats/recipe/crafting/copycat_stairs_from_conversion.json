@@ -1,25 +1,20 @@
 {
-  "neoforge:conditions": [
+  "category": "misc",
+  "fabric:load_conditions": [
     {
-      "type": "copycats:feature_enabled",
-      "feature": "copycats:copycat_vertical_stairs",
-      "invert": false
+      "condition": "copycats:feature_enabled",
+      "feature": "copycats:copycat_vertical_stairs"
     },
     {
-      "type": "copycats:feature_enabled",
-      "feature": "copycats:copycat_stairs",
-      "invert": false
+      "condition": "copycats:feature_enabled",
+      "feature": "copycats:copycat_stairs"
     }
   ],
-  "type": "minecraft:crafting_shapeless",
-  "category": "misc",
   "ingredients": [
-    {
-      "item": "copycats:copycat_vertical_stairs"
-    }
+    "copycats:copycat_vertical_stairs"
   ],
   "result": {
-    "count": 1,
     "id": "copycats:copycat_stairs"
-  }
+  },
+  "type": "minecraft:crafting_shapeless"
 }

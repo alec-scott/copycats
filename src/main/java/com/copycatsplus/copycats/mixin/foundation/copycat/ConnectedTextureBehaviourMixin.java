@@ -71,7 +71,7 @@ public class ConnectedTextureBehaviourMixin {
 
 
     @WrapOperation(
-            at = @At(value = "INVOKE", target = "Lcom/simibubi/create/foundation/block/connected/ConnectedTextureBehaviour;getCTBlockState(Lnet/minecraft/world/level/BlockAndTintGetter;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/Direction;Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/block/state/BlockState;"),
+            at = @At(value = "INVOKE", target = "Lcom/zurrtum/create/client/foundation/block/connected/ConnectedTextureBehaviour;getCTBlockState(Lnet/minecraft/client/renderer/block/BlockAndTintGetter;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/Direction;Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/block/state/BlockState;"),
             method = "isBeingBlocked"
     )
     private BlockState getAppearanceForBlockingLogic(ConnectedTextureBehaviour instance, BlockAndTintGetter reader, BlockState reference, Direction face, BlockPos fromPos, BlockPos toPos, Operation<BlockState> original) {

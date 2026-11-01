@@ -16,7 +16,7 @@ public interface CreativeModeTabsAccessor {
         throw new UnsupportedOperationException();
     }
 
-    @Accessor
+    @Accessor("CACHED_PARAMETERS")
     static CreativeModeTab.ItemDisplayParameters getCACHED_PARAMETERS() {
         throw new UnsupportedOperationException();
     }

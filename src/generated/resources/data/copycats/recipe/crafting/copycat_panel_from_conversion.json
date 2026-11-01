@@ -1,25 +1,20 @@
 {
-  "neoforge:conditions": [
+  "category": "misc",
+  "fabric:load_conditions": [
     {
-      "type": "copycats:feature_enabled",
-      "feature": "copycats:copycat_trapdoor",
-      "invert": false
+      "condition": "copycats:feature_enabled",
+      "feature": "copycats:copycat_trapdoor"
     },
     {
-      "type": "copycats:feature_enabled",
-      "feature": "create:copycat_panel",
-      "invert": false
+      "condition": "copycats:feature_enabled",
+      "feature": "create:copycat_panel"
     }
   ],
-  "type": "minecraft:crafting_shapeless",
-  "category": "misc",
   "ingredients": [
-    {
-      "item": "copycats:copycat_trapdoor"
-    }
+    "copycats:copycat_trapdoor"
   ],
   "result": {
-    "count": 1,
     "id": "create:copycat_panel"
-  }
+  },
+  "type": "minecraft:crafting_shapeless"
 }

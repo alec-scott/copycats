@@ -1,32 +1,21 @@
 {
-  "neoforge:conditions": [
+  "category": "misc",
+  "fabric:load_conditions": [
     {
-      "type": "copycats:feature_enabled",
-      "feature": "copycats:copycat_fluid_pipe",
-      "invert": false
+      "condition": "copycats:feature_enabled",
+      "feature": "copycats:copycat_fluid_pipe"
     }
   ],
-  "type": "minecraft:crafting_shapeless",
-  "category": "misc",
   "ingredients": [
-    {
-      "item": "create:fluid_pipe"
-    },
-    {
-      "item": "create:fluid_pipe"
-    },
-    {
-      "item": "create:fluid_pipe"
-    },
-    {
-      "item": "create:fluid_pipe"
-    },
-    {
-      "item": "create:zinc_ingot"
-    }
+    "create:fluid_pipe",
+    "create:fluid_pipe",
+    "create:fluid_pipe",
+    "create:fluid_pipe",
+    "create:zinc_ingot"
   ],
   "result": {
     "count": 4,
     "id": "copycats:copycat_fluid_pipe"
-  }
+  },
+  "type": "minecraft:crafting_shapeless"
 }

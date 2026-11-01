@@ -180,7 +180,9 @@ public class BlockFaceUtils {
         IMultiStateCopycatBlock copycatBlock = (IMultiStateCopycatBlock) state.getBlock();
         Vec3i scale = copycatBlock.vectorScale(state);
         Vec3i part = copycatBlock.getVectorFromProperty(state, property);
-        return getPartialFaceShape(state.getOcclusionShape(), face, part, scale);
+        // PORT-NOTE(26.1): the occlusion shape is cached and not built yet when this runs from block constructors;
+        // the default occlusion shape is the block shape
+        return getPartialFaceShape(state.getShape(net.minecraft.world.level.EmptyBlockGetter.INSTANCE, BlockPos.ZERO), face, part, scale);
     }
 
     public static VoxelShape getPartialFaceShape(VoxelShape voxelShape, Direction direction, Vec3i part, Vec3i scale) {

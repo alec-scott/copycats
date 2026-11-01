@@ -1,17 +1,13 @@
 {
-  "neoforge:conditions": [
+  "category": "misc",
+  "fabric:load_conditions": [
     {
-      "type": "copycats:feature_enabled",
-      "feature": "copycats:copycat_box",
-      "invert": false
+      "condition": "copycats:feature_enabled",
+      "feature": "copycats:copycat_box"
     }
   ],
-  "type": "minecraft:crafting_shaped",
-  "category": "misc",
   "key": {
-    "s": {
-      "tag": "copycats:copycat_board"
-    }
+    "s": "#copycats:copycat_board"
   },
   "pattern": [
     "ss ",
@@ -19,7 +15,7 @@
     " ss"
   ],
   "result": {
-    "count": 1,
     "id": "copycats:copycat_box"
-  }
+  },
+  "type": "minecraft:crafting_shaped"
 }

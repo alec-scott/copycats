@@ -1,32 +1,21 @@
 {
-  "neoforge:conditions": [
+  "category": "misc",
+  "fabric:load_conditions": [
     {
-      "type": "copycats:feature_enabled",
-      "feature": "copycats:copycat_large_cogwheel",
-      "invert": false
+      "condition": "copycats:feature_enabled",
+      "feature": "copycats:copycat_large_cogwheel"
     }
   ],
-  "type": "minecraft:crafting_shapeless",
-  "category": "misc",
   "ingredients": [
-    {
-      "item": "create:large_cogwheel"
-    },
-    {
-      "item": "create:large_cogwheel"
-    },
-    {
-      "item": "create:large_cogwheel"
-    },
-    {
-      "item": "create:large_cogwheel"
-    },
-    {
-      "item": "create:zinc_ingot"
-    }
+    "create:large_cogwheel",
+    "create:large_cogwheel",
+    "create:large_cogwheel",
+    "create:large_cogwheel",
+    "create:zinc_ingot"
   ],
   "result": {
     "count": 4,
     "id": "copycats:copycat_large_cogwheel"
-  }
+  },
+  "type": "minecraft:crafting_shapeless"
 }

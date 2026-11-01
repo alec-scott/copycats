@@ -1,25 +1,20 @@
 {
-  "neoforge:conditions": [
+  "category": "misc",
+  "fabric:load_conditions": [
     {
-      "type": "copycats:feature_enabled",
-      "feature": "copycats:copycat_stacked_half_layer",
-      "invert": false
+      "condition": "copycats:feature_enabled",
+      "feature": "copycats:copycat_stacked_half_layer"
     },
     {
-      "type": "copycats:feature_enabled",
-      "feature": "copycats:copycat_half_layer",
-      "invert": false
+      "condition": "copycats:feature_enabled",
+      "feature": "copycats:copycat_half_layer"
     }
   ],
-  "type": "minecraft:crafting_shapeless",
-  "category": "misc",
   "ingredients": [
-    {
-      "item": "copycats:copycat_stacked_half_layer"
-    }
+    "copycats:copycat_stacked_half_layer"
   ],
   "result": {
-    "count": 1,
     "id": "copycats:copycat_half_layer"
-  }
+  },
+  "type": "minecraft:crafting_shapeless"
 }

@@ -1,23 +1,17 @@
 {
-  "neoforge:conditions": [
+  "category": "misc",
+  "fabric:load_conditions": [
     {
-      "type": "copycats:feature_enabled",
-      "feature": "copycats:copycat_iron_door",
-      "invert": false
+      "condition": "copycats:feature_enabled",
+      "feature": "copycats:copycat_iron_door"
     }
   ],
-  "type": "minecraft:crafting_shapeless",
-  "category": "misc",
   "ingredients": [
-    {
-      "item": "minecraft:iron_door"
-    },
-    {
-      "item": "create:zinc_ingot"
-    }
+    "minecraft:iron_door",
+    "create:zinc_ingot"
   ],
   "result": {
-    "count": 1,
     "id": "copycats:copycat_iron_door"
-  }
+  },
+  "type": "minecraft:crafting_shapeless"
 }

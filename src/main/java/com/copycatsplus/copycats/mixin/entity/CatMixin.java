@@ -88,13 +88,6 @@ public abstract class CatMixin extends TamableAnimal {
                 .ifPresent(this::setNaturalVariant);
     }
 
-    @Inject(at = @At("HEAD"), method = "usePlayerItem")
-    private void useCopycat(Player pPlayer, InteractionHand pHand, ItemStack pStack, CallbackInfo ci) {
-        if (pStack.is(CCBlocks.COPYCAT_BLOCK.asItem())) {
-            this.playSound(SoundEvents.ITEM_FRAME_ADD_ITEM, 75f, .95f);
-        }
-    }
-
     @Inject(at = @At("HEAD"), method = "mobInteract", cancellable = true)
     private void copycatInteract(Player pPlayer, InteractionHand pHand, CallbackInfoReturnable<InteractionResult> cir) {
         ItemStack stack = pPlayer.getItemInHand(pHand);
@@ -105,6 +98,7 @@ public abstract class CatMixin extends TamableAnimal {
             if (!level().isClientSide()) {
                 this.setNaturalVariant(currentVariant);
                 this.setVariant(copycats$copyCat());
+                this.playSound(SoundEvents.ITEM_FRAME_ADD_ITEM, 75f, .95f);
                 this.usePlayerItem(pPlayer, pHand, stack);
                 this.setPersistenceRequired();
             }

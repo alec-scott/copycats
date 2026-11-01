@@ -1,17 +1,14 @@
 {
-  "neoforge:conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "copycats:feature_enabled",
-      "feature": "copycats:copycat_slope_layer",
-      "invert": false
+      "condition": "copycats:feature_enabled",
+      "feature": "copycats:copycat_slope_layer"
     }
   ],
-  "type": "minecraft:stonecutting",
-  "ingredient": {
-    "tag": "c:ingots/zinc"
-  },
+  "ingredient": "#c:ingots/zinc",
   "result": {
     "count": 8,
     "id": "copycats:copycat_slope_layer"
-  }
+  },
+  "type": "minecraft:stonecutting"
 }

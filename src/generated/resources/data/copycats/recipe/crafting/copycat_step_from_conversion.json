@@ -1,20 +1,16 @@
 {
-  "neoforge:conditions": [
+  "category": "misc",
+  "fabric:load_conditions": [
     {
-      "type": "copycats:feature_enabled",
-      "feature": "copycats:copycat_vertical_step",
-      "invert": false
+      "condition": "copycats:feature_enabled",
+      "feature": "copycats:copycat_vertical_step"
     }
   ],
-  "type": "minecraft:crafting_shapeless",
-  "category": "misc",
   "ingredients": [
-    {
-      "tag": "copycats:copycat_vertical_step"
-    }
+    "#copycats:copycat_vertical_step"
   ],
   "result": {
-    "count": 1,
     "id": "create:copycat_step"
-  }
+  },
+  "type": "minecraft:crafting_shapeless"
 }

@@ -1,17 +1,14 @@
 {
-  "neoforge:conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "copycats:feature_enabled",
-      "feature": "copycats:copycat_trapdoor",
-      "invert": false
+      "condition": "copycats:feature_enabled",
+      "feature": "copycats:copycat_trapdoor"
     }
   ],
-  "type": "minecraft:stonecutting",
-  "ingredient": {
-    "tag": "c:ingots/zinc"
-  },
+  "ingredient": "#c:ingots/zinc",
   "result": {
     "count": 4,
     "id": "copycats:copycat_trapdoor"
-  }
+  },
+  "type": "minecraft:stonecutting"
 }

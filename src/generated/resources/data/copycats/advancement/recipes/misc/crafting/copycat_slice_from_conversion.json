@@ -1,17 +1,4 @@
 {
-  "neoforge:conditions": [
-    {
-      "type": "copycats:feature_enabled",
-      "feature": "copycats:copycat_vertical_slice",
-      "invert": false
-    },
-    {
-      "type": "copycats:feature_enabled",
-      "feature": "copycats:copycat_slice",
-      "invert": false
-    }
-  ],
-  "parent": "minecraft:recipes/root",
   "criteria": {
     "has_item": {
       "conditions": {
@@ -30,6 +17,17 @@
       "trigger": "minecraft:recipe_unlocked"
     }
   },
+  "fabric:load_conditions": [
+    {
+      "condition": "copycats:feature_enabled",
+      "feature": "copycats:copycat_vertical_slice"
+    },
+    {
+      "condition": "copycats:feature_enabled",
+      "feature": "copycats:copycat_slice"
+    }
+  ],
+  "parent": "minecraft:recipes/root",
   "requirements": [
     [
       "has_the_recipe",

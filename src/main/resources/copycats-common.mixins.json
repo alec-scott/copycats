@@ -24,8 +24,6 @@
     "feature_toggle.CreativeModeTabsAccessor",
     "foundation.copycat.BearingContraptionMixin",
     "foundation.copycat.BlockEntityAccessor",
-    "foundation.copycat.BlockMixin",
-    "foundation.copycat.BlockStateBaseCacheMixin",
     "foundation.copycat.BlockStateBaseMixin",
     "foundation.copycat.ChunkAccessAccessor",
     "foundation.copycat.ConnectedTextureBehaviourMixin",
