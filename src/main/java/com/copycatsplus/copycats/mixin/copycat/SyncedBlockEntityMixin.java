@@ -1,7 +1,9 @@
 package com.copycatsplus.copycats.mixin.copycat;
 
 import com.zurrtum.create.foundation.blockEntity.SyncedBlockEntity;
-import com.zurrtum.create.client.foundation.virtualWorld.VirtualRenderWorld;
+import com.copycatsplus.copycats.utility.VirtualLevelCheck;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -19,8 +21,9 @@ public class SyncedBlockEntityMixin {
             cancellable = true
     )
     private void doNotSyncVirtual(CallbackInfo ci) {
-        SyncedBlockEntity self = (SyncedBlockEntity) (Object) this;
-        if (self.getLevel() != null && self.getLevel() instanceof VirtualRenderWorld) {
+        Level level = ((SyncedBlockEntity) (Object) this).getLevel();
+        // Virtual render worlds are client only; never touch the client class on a server level
+        if (level != null && !(level instanceof ServerLevel) && VirtualLevelCheck.isVirtual(level)) {
             ci.cancel();
         }
     }
