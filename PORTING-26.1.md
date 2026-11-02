@@ -70,6 +70,11 @@ Create Fly comes from the local checkout's jar (`create_fly_jar` in `gradle.prop
 - Data: 68 recipes and 68 advancements converted; 45 item definitions; air loot tables removed.
 - **Dedicated server boots clean** (Create Fly + Steam 'n' Rails + D&D + Copycats+).
 
+### 2026-11-02
+- **Dedicated server crash fixed** (found by the CC&A boot test): `SyncedBlockEntityMixin` referenced the client-only
+  `VirtualRenderWorld`, so any `notifyUpdate` on a dedicated server threw `NoClassDefFoundError`. Server levels now
+  skip the check; the client class lives in `utility/VirtualLevelCheck`. Released build 1 has this bug.
+
 ## TODO
 
 - [ ] Client test: copycat rendering (simple, multi-state, slopes, CT on/off), tints (grass/leaves), item models,
