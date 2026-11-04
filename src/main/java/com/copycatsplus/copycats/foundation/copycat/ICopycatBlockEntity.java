@@ -186,8 +186,11 @@ public interface ICopycatBlockEntity extends SpecialBlockEntityItemRequirement, 
      * Drop the consumed item when the block entity is removed (call from preRemoveSideEffects).
      */
     static void dropConsumedItems(ICopycatBlockEntity self, BlockPos pos) {
-        if (self.getLevel() != null)
+        if (self.getLevel() != null) {
             net.minecraft.world.level.block.Block.popResource(self.getLevel(), pos, self.getConsumedItem());
+            // PORT-NOTE(26.1): vanilla's light check on removal ignores the material's emission, so queue one
+            BlockEntityUtils.updateLight((BlockEntity) self);
+        }
     }
 
     static void read(ICopycatBlockEntity self, ValueInput view, boolean clientPacket) {

@@ -243,8 +243,11 @@ public interface IMultiStateCopycatBlockEntity extends ICopycatBlockEntity {
      * Drop the consumed items when the block entity is removed (call from preRemoveSideEffects).
      */
     static void dropConsumedItems(IMultiStateCopycatBlockEntity self, BlockPos pos) {
-        if (self.getLevel() != null)
+        if (self.getLevel() != null) {
             self.getMaterialItemStorage().getAllConsumedItems().forEach(stack -> net.minecraft.world.level.block.Block.popResource(self.getLevel(), pos, stack));
+            // PORT-NOTE(26.1): vanilla's light check on removal ignores the material's emission, so queue one
+            BlockEntityUtils.updateLight((BlockEntity) self);
+        }
     }
 
     static void read(IMultiStateCopycatBlockEntity self, ValueInput view, boolean clientPacket) {

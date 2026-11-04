@@ -75,6 +75,11 @@ Create Fly comes from the local checkout's jar (`create_fly_jar` in `gradle.prop
   `VirtualRenderWorld`, so any `notifyUpdate` on a dedicated server threw `NoClassDefFoundError`. Server levels now
   skip the check; the client class lives in `utility/VirtualLevelCheck`. Released build 1 has this bug.
 
+### 2026-11-04
+- **Ghost light after breaking a copycat holding a lit lamp**: vanilla only queues a light check when the old and new
+  block states differ in emission/opacity, and a copycat state itself emits 0, so removal never rechecked the position.
+  `dropConsumedItems` (called from `preRemoveSideEffects`) now calls `BlockEntityUtils.updateLight`.
+
 ## TODO
 
 - [ ] Client test: copycat rendering (simple, multi-state, slopes, CT on/off), tints (grass/leaves), item models,
