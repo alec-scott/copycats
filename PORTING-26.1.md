@@ -89,3 +89,6 @@ Create Fly comes from the local checkout's jar (`create_fly_jar` in `gradle.prop
 - [ ] Client test: glowing materials (vanilla engine and ScalableLux), light updating when a material changes or the
       copycat is broken, relog/chunk reload keeps the light.
 - [ ] Revisit: Sodium compat (if the server pack uses it).
+
+## Light with ModernFix (2026-11-07)
+On the server light engine, `CopycatLight` read block entities through `ImposterProtoChunk`, and ModernFix's `avoidLeakingLiveBE` makes that return null off the main thread. The room looked lit (the client engine reads `LevelChunk`), but the server's light map read 0. It now reads the wrapped chunk's block entity map directly.

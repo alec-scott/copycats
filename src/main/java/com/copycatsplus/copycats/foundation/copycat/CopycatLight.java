@@ -5,6 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LightChunkGetter;
 import org.jetbrains.annotations.Nullable;
@@ -32,9 +33,15 @@ public final class CopycatLight {
         if (chunk == null || !isCopycat(state))
             return original;
         try {
-            BlockEntity be = chunk instanceof LevelChunk levelChunk
-                    ? levelChunk.getBlockEntity(pos, LevelChunk.EntityCreationType.CHECK)
-                    : chunk.getBlockEntity(pos);
+            BlockEntity be;
+            if (chunk instanceof LevelChunk levelChunk)
+                be = levelChunk.getBlockEntity(pos, LevelChunk.EntityCreationType.CHECK);
+            else if (chunk instanceof ImposterProtoChunk imposter)
+                // The server light engine reads through this wrapper. ModernFix makes its getBlockEntity return null off the
+                // main thread, so read the wrapped chunk's map (no pending block entities are created here)
+                be = imposter.getWrapped().getBlockEntities().get(pos);
+            else
+                be = chunk.getBlockEntity(pos);
             if (be == null)
                 return original;
             return Math.max(original, BlockEntityUtils.getLightEmission(be));
